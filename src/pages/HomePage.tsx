@@ -1,13 +1,13 @@
 import { Box, Container, Typography } from "@mui/material";
 import HeroSection from "../components/HeroSection";
+import ClientsSection from "../components/ClientsSection";
 
 const HomePage = () => {
   return (
     <Box sx={{ minHeight: "100vh" }}>
       <HeroSection />
-      
-      {/* Features Section */}
-      <Box sx={{ py: 8, bgcolor: "#F7F9FC" }}>
+        {/* Features Section */}
+      <Box id="how-it-works" sx={{ py: 8, bgcolor: "#F7F9FC" }}>
         <Container maxWidth="lg">
           <Typography 
             variant="h2" 
@@ -96,8 +96,8 @@ const HomePage = () => {
               </Box>
             ))}
           </Box>
-        </Container>
-      </Box>
+        </Container>      
+        </Box>
       
       {/* Benefits Section */}
       <Box sx={{ py: 8, bgcolor: "#1E2A38" }}>
@@ -167,38 +167,12 @@ const HomePage = () => {
               </Box>
             ))}
           </Box>
-        </Container>
-      </Box>
-      
-      {/* Footer */}
-      <Box sx={{ py: 4, bgcolor: "#111921", color: "white" }}>
-        <Container maxWidth="lg">
-          <Box 
-            sx={{ 
-              display: "flex", 
-              justifyContent: "space-between",
-              alignItems: "center",
-              flexDirection: { xs: "column", sm: "row" },
-              gap: { xs: 2, sm: 0 }
-            }}
-          >
-            <Typography variant="body2" sx={{ fontFamily: "'Inter', sans-serif" }}>
-              © 2025 Service Marketplace Platform. Tous droits réservés.
-            </Typography>
-            <Box sx={{ display: "flex", gap: 3 }}>
-              <Typography variant="body2" sx={{ cursor: "pointer", "&:hover": { textDecoration: "underline" } }}>
-                Conditions d'utilisation
-              </Typography>
-              <Typography variant="body2" sx={{ cursor: "pointer", "&:hover": { textDecoration: "underline" } }}>
-                Confidentialité
-              </Typography>
-              <Typography variant="body2" sx={{ cursor: "pointer", "&:hover": { textDecoration: "underline" } }}>
-                Mentions légales
-              </Typography>
-            </Box>
-          </Box>
-        </Container>
-      </Box>
+        </Container> 
+        </Box>
+
+        {/* Clients Section */}
+        <ClientsSection />
+
     </Box>
   );
 };
