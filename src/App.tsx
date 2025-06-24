@@ -13,6 +13,7 @@ import RegisterPage from './pages/RegisterPage';
 import PathEditorPage from './pages/PathEditorPage';
 import ContractPage from './pages/ContractPage';
 import DashboardPage from './pages/DashboardPage';
+import { AuthProvider } from './contexts/AuthContext';
 import './index.css';
 import '@fontsource/inter/400.css';
 import '@fontsource/inter/500.css';
@@ -71,13 +72,13 @@ const theme = createTheme({
 
 import Layout from './components/layout/Layout';
 
-function App() {
-  return (
+function App() {  return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <Layout>
-          <Routes>
+        <AuthProvider>
+          <Layout>
+            <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/need-form" element={<NeedFormPage />} />
             <Route path="/service-paths" element={<ServicePathsPage />} />
@@ -94,9 +95,9 @@ function App() {
             <Route path="/contract" element={<ContractPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-          </Routes>
-        </Layout>
+            <Route path="/register" element={<RegisterPage />} />          </Routes>
+          </Layout>
+        </AuthProvider>
       </Router>
     </ThemeProvider>
   )
