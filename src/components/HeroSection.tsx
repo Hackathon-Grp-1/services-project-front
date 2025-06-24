@@ -14,7 +14,7 @@ const HeroSection = () => {
         bgcolor: "primary.main",
         color: "white",
         pt: { xs: 8, md: 12 },
-        pb: { xs: 10, md: 16 },
+        pb: { xs: 6, md: 10 },
         position: "relative",
         overflow: "hidden",
       }}
@@ -62,25 +62,24 @@ const HeroSection = () => {
               fontSize: { xs: "2.5rem", md: "4rem" },
               fontWeight: 700,
               mb: 2,
-              fontFamily: "'Orbitron', sans-serif",
+              fontFamily: "'Inter', sans-serif",
             }}
           >
-            Service Marketplace Platform
+            Vous avez une idée ? On assemble l’équipe pour la concrétiser.
           </Typography>
           <Typography
             variant="h2"
             sx={{
-              fontSize: { xs: "1.25rem", md: "1.75rem" },
+              fontSize: { xs: "1.05rem", md: "1.35rem" },
               fontWeight: 400,
-              mb: 6,
+              my: 4,
               maxWidth: 800,
               mx: "auto",
               color: "rgba(255, 255, 255, 0.85)",
               fontFamily: "'Inter', sans-serif",
             }}
           >
-            La plateforme B2B qui connecte les PME aux meilleurs services métiers,
-            orchestrés par l'intelligence artificielle
+            Une seule plateforme. Une seule facture. Un projet complet.
           </Typography>
           <Box>
             <Button
