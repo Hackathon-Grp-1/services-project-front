@@ -54,7 +54,7 @@ const NeedFormPage = () => {
           <Typography 
             variant="h2" 
             component="h1" 
-            sx={{ fontFamily: "'Orbitron', sans-serif", mb: 2 }}
+            sx={{ fontFamily: "'Inter', sans-serif", mb: 2 }}
           >
             Décrivez votre besoin
           </Typography>
