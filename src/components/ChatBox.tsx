@@ -23,6 +23,8 @@ interface ChatMessage {
   professionals?: Array<{
     id: number;
     description: string;
+    tarif?: string;
+    skills?: string[];
   }>;
 }
 
@@ -34,7 +36,12 @@ interface ChatBoxProps {
 
 // Component for displaying professional cards
 const ProfessionalCard = ({ professional, onClick }: { 
-  professional: { id: number; description: string }; 
+  professional: { 
+    id: number; 
+    description: string;
+    tarif?: string;
+    skills?: string[];
+  }; 
   onClick?: (id: number) => void 
 }) => {
   // Extract name from description (typically the first part before the comma)
@@ -61,29 +68,83 @@ const ProfessionalCard = ({ professional, onClick }: {
       onClick={() => onClick && onClick(professional.id)}
     >
       <CardContent>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-          <PersonIcon color="primary" sx={{ mr: 1 }} />
-          <Typography 
-          variant="h6" 
-          component="div"
-          sx={{ 
-            fontFamily: 'Inter, sans-serif', 
-            lineHeight: 1.5,
-          }}>
-            {name}
-          </Typography>
+        {/* Header with name and rate */}
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between',
+          mb: 1 
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <PersonIcon color="primary" sx={{ mr: 1 }} />
+            <Typography 
+              variant="h6" 
+              component="div"
+              sx={{ 
+                fontFamily: 'Inter, sans-serif', 
+                lineHeight: 1.5,
+              }}>
+              {name}
+            </Typography>
+          </Box>
+          {professional.tarif && (
+            <Box 
+              sx={{ 
+                bgcolor: 'primary.light',
+                color: 'white',
+                px: 1.5,
+                py: 0.5,
+                borderRadius: 10,
+                fontSize: '0.75rem',
+                fontWeight: 'bold',
+                fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              {professional.tarif}
+            </Box>
+          )}
         </Box>
+
+        {/* Description */}
         <Typography 
           variant="body2" 
           color="text.secondary"
           sx={{ 
             fontFamily: 'Inter, sans-serif', 
             lineHeight: 1.5,
-            fontSize: '0.875rem'
+            fontSize: '0.875rem',
+            mb: professional.skills && professional.skills.length > 0 ? 2 : 0
           }}
         >
           {details}
         </Typography>
+        
+        {/* Skills chips */}
+        {professional.skills && professional.skills.length > 0 && (
+          <Box sx={{ 
+            display: 'flex', 
+            flexWrap: 'wrap', 
+            gap: 0.75,
+            mt: 1 
+          }}>
+            {professional.skills.map((skill, idx) => (
+              <Box 
+                key={idx}
+                sx={{
+                  bgcolor: 'secondary.light',
+                  color: 'white',
+                  px: 1,
+                  py: 0.25,
+                  borderRadius: 1,
+                  fontSize: '0.7rem',
+                  fontFamily: 'Inter, sans-serif',
+                }}
+              >
+                {skill}
+              </Box>
+            ))}
+          </Box>
+        )}
       </CardContent>
       <CardActions>
         <Button size="small" color="primary">
@@ -309,7 +370,12 @@ const ChatBox = ({ initialPrompt, onClose, onNewConversation }: ChatBoxProps) =>
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<null | HTMLDivElement>(null);  // Référence pour suivre si le message initial a déjà été envoyé
   const initialPromptSent = useRef(false);
-  const [activeProfessionals, setActiveProfessionals] = useState<Array<{id: number, description: string}>>([]);
+  const [activeProfessionals, setActiveProfessionals] = useState<Array<{
+    id: number; 
+    description: string; 
+    tarif?: string;
+    skills?: string[];
+  }>>([]);
   const [selectedProfessionalId, setSelectedProfessionalId] = useState<number | null>(null);
 
   useEffect(() => {
