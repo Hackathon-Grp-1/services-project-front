@@ -634,29 +634,33 @@ const ChatBox = ({ initialPrompt, onClose, onNewConversation, chatType = 'search
     >
       <Box sx={{ 
         display: 'flex',
-        justifyContent: 'flex-end',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         p: 2
       }}>
-        <Typography variant="h6">
+        <Box sx={{ flex: 1 }} />
+        <Typography variant="h6" sx={{ flex: 1, textAlign: 'center' }}>
           {chatType === 'create_service' ? 'Création de service avec l\'IA' : 'Discussion avec l\'IA'}
         </Typography>
-        <Button
-          variant="outlined"
-          color="primary"
-          startIcon={<SendIcon />}
-          onClick={handleNewConversation}
-          sx={{ mr: 2 }}
-        >
-          Nouvelle conversation
-        </Button>
-        <IconButton 
-          color="primary"
-          onClick={onClose}
-          title="Fermer"
-          sx={{ border: '1px solid', borderColor: 'divider' }}
-        >
-          <CloseIcon />
-        </IconButton>
+        <Box sx={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>  
+          <Button
+            variant="outlined"
+            color="primary"
+            startIcon={<SendIcon />}
+            onClick={handleNewConversation}
+            sx={{ mr: 2 }}
+          >
+            Nouvelle conversation
+          </Button>
+          <IconButton 
+            color="primary"
+            onClick={onClose}
+            title="Fermer"
+            sx={{ border: '1px solid', borderColor: 'divider' }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </Box>
       </Box>
 
       <Box sx={{ 

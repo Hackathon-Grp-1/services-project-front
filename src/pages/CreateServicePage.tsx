@@ -3,12 +3,19 @@ import { Box, Button, Container, TextField, Typography, CircularProgress } from 
 import { motion, AnimatePresence } from 'framer-motion';
 import ChatBox from '../components/ChatBox';
 import { startNewChat } from '../api/chatApi';
+import { useServiceStore } from '../store/serviceStore';
 
 const CreateServicePage = () => {
   const [inputPrompt, setInputPrompt] = useState('');
   const [error, setError] = useState('');
   const [showChat, setShowChat] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+  const { 
+    setPrompt, 
+    setServicePaths, 
+    isLoading, 
+    setIsLoading 
+  } = useServiceStore(); 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,6 +28,7 @@ const CreateServicePage = () => {
     }
     
     setError('');
+    setIsLoading(true);
     console.log('Initialisation du chat de création de service...');
     
     try {
@@ -35,6 +43,10 @@ const CreateServicePage = () => {
       console.error('Error starting chat for service creation:', err);
       setError('Une erreur est survenue. Veuillez réessayer.');
       setShowChat(false);
+    }
+    finally {
+      setIsLoading(false);
+      console.log('Chargement désactivé');
     }
   };
 
@@ -52,8 +64,23 @@ const CreateServicePage = () => {
   };
   
   return (
-    <Box sx={{ py: 8, minHeight: '100vh', bgcolor: 'background.default' }}>
-      <Container maxWidth="md">
+    <Box sx={{ 
+      py: showChat ? 0 : 8, 
+      minHeight: showChat ? 'auto' : '100vh', 
+      height: 'auto',
+      bgcolor: 'background.default',
+      display: 'block',
+      position: 'relative',
+      marginBottom: 0
+    }}>
+      <Container 
+        maxWidth={showChat ? false : "md"} 
+        disableGutters={showChat} 
+        sx={{ 
+          display: 'block',
+          height: 'auto',
+          pb: showChat ? 0 : 'inherit' // Supprime le padding bottom quand le chat est affiché
+        }}>
         <AnimatePresence>
           {!showChat && (
             <motion.div
@@ -104,6 +131,7 @@ const CreateServicePage = () => {
                   variant="contained"
                   color="secondary"
                   size="large"
+                  disabled={isLoading}
                   sx={{
                     px: 5,
                     py: 1.5,
@@ -113,21 +141,34 @@ const CreateServicePage = () => {
                     textTransform: 'none',
                   }}
                 >
-                  Créer mon service avec l'IA
+                  {isLoading ? (
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <CircularProgress size={24} sx={{ mr: 2, color: 'white' }} />
+                      Génération en cours...
+                    </Box>
+                  ) : (
+                    'Créer mon service avec l\'IA'
+                  )}
                 </Button>
               </Box>
             </motion.div>
           )}
-          
-          {showChat && (
+            {showChat && (
             <motion.div
               key="chat"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              style={{ width: '100%', height: '70vh' }}
+              style={{ 
+                width: '100%',
+                height: 'calc(100vh - 70px)', // Hauteur réduite pour ne pas déborder sur le footer
+                display: 'block',
+                marginBottom: '20px' // Marge en bas pour éviter de toucher le footer
+              }}
             >
+              {/* Rendu du ChatBox */}
+              {(() => { console.log('Rendu du ChatBox avec initialPrompt:', inputPrompt); return null; })()}
               <ChatBox 
                 initialPrompt={inputPrompt} 
                 onClose={handleCloseChat}
