@@ -71,11 +71,13 @@ const theme = createTheme({
 });
 
 import Layout from './components/layout/Layout';
+import ScrollToTop from './utils/ScrollToTop';
 
 function App() {  return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
+        <ScrollToTop />
         <AuthProvider>
           <Layout>
             <Routes>
