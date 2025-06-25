@@ -1,36 +1,54 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Box, Button, Container, TextField, Typography, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { fetchServicePaths } from '../api/mockApi';
 import { useServiceStore } from '../store/serviceStore';
+import ChatBox from '../components/ChatBox';
+import { startNewChat } from '../api/chatApi';
 
 const NeedFormPage = () => {
   const [inputPrompt, setInputPrompt] = useState('');
   const [error, setError] = useState('');
+  const [showChat, setShowChat] = useState(false);
   const navigate = useNavigate();
+  const formRef = useRef<HTMLFormElement>(null);
     
   const { 
     setPrompt, 
     setServicePaths, 
     isLoading, 
     setIsLoading 
-  } = useServiceStore();
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  } = useServiceStore();  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Formulaire soumis avec prompt:', inputPrompt);
     
     if (!inputPrompt.trim()) {
       setError('Veuillez décrire votre besoin');
+      console.log('Erreur: prompt vide');
       return;
     }
     
     setError('');
     setIsLoading(true);
+    console.log('Chargement activé, initialisation du chat...');
     
     try {
+      // Démarrer une nouvelle session de chat
+      const sessionId = startNewChat();
+      console.log('Nouvelle session de chat créée, ID:', sessionId);
+      
       // Store the prompt in global state
       setPrompt(inputPrompt);
+      console.log('Prompt stocké dans le state global');
       
+      // Afficher le chat
+      setShowChat(true);
+      console.log('showChat mis à true, le chat devrait s\'afficher');
+      
+      // On n'utilise plus le mock API et la navigation directe vers service-paths
+      // mais on garde le code commenté au cas où on en aurait besoin plus tard
+      /*
       // Call the mock API
       const paths = await fetchServicePaths(inputPrompt);
       
@@ -39,77 +57,124 @@ const NeedFormPage = () => {
       
       // Navigate to the service paths page
       navigate('/service-paths');
+      */
     } catch (err) {
-      console.error('Error fetching service paths:', err);
+      console.error('Error starting chat:', err);
       setError('Une erreur est survenue. Veuillez réessayer.');
+      setShowChat(false);
     } finally {
       setIsLoading(false);
+      console.log('Chargement désactivé');
     }
   };
 
+  const handleCloseChat = () => {
+    console.log('Fermeture du chat demandée');
+    setShowChat(false);
+    setInputPrompt('');
+    setError('');
+  };
+
+  const handleNewConversation = () => {
+    console.log('Nouvelle conversation demandée');
+    setInputPrompt('');
+    setError('');
+  };
+  
   return (
     <Box sx={{ py: 8, minHeight: '100vh', bgcolor: 'background.default' }}>
       <Container maxWidth="md">
-        <Box sx={{ mb: 6, textAlign: 'center' }}>
-          <Typography 
-            variant="h2" 
-            component="h1" 
-            sx={{ fontFamily: "'Inter', sans-serif", mb: 2 }}
-          >
-            Décrivez votre besoin
-          </Typography>
-          <Typography variant="body1" sx={{ mb: 1 }}>
-            Partagez les détails de votre projet pour que notre IA puisse vous proposer les meilleurs parcours de services.
-          </Typography>
-        </Box>
-        
-        <Box 
-          component="form" 
-          onSubmit={handleSubmit} 
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
-        >
-          <TextField
-            multiline
-            rows={8}
-            value={inputPrompt}
-            onChange={(e) => setInputPrompt(e.target.value)}
-            placeholder="Ex: Je souhaite créer un site e-commerce pour vendre mes produits artisanaux avec une boutique en ligne, un système de paiement sécurisé et une gestion des stocks..."
-            fullWidth
-            variant="outlined"
-            error={!!error}
-            helperText={error}
-            sx={{ mb: 4 }}
-          />
-          
-          <Button
-            type="submit"
-            variant="contained"
-            color="secondary"
-            size="large"
-            disabled={isLoading}
-            sx={{
-              px: 5,
-              py: 1.5,
-              fontSize: '1.125rem',
-              fontWeight: 600,
-              borderRadius: 2,
-              textTransform: 'none',
-            }}
-          >
-            {isLoading ? (
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <CircularProgress size={24} sx={{ mr: 2, color: 'white' }} />
-                Génération en cours...
+        <AnimatePresence>
+          {!showChat && (
+            <motion.div
+              key="form"
+              initial={{ opacity: 1 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Box sx={{ mb: 6, textAlign: 'center' }}>
+                <Typography 
+                  variant="h2" 
+                  component="h1" 
+                  sx={{ fontFamily: "'Inter', sans-serif", mb: 2 }}
+                >
+                  Décrivez votre besoin
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  Partagez les détails de votre projet pour que notre IA puisse vous proposer les meilleurs parcours de services.
+                </Typography>
               </Box>
-            ) : (
-              'Générer avec l\'IA'
-            )}
-          </Button>
-        </Box>
+              
+              <Box 
+                component="form" 
+                ref={formRef}
+                onSubmit={handleSubmit} 
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                }}
+              >
+                <TextField
+                  multiline
+                  rows={8}
+                  value={inputPrompt}
+                  onChange={(e) => setInputPrompt(e.target.value)}
+                  placeholder="Ex: Je souhaite créer un site e-commerce pour vendre mes produits artisanaux avec une boutique en ligne, un système de paiement sécurisé et une gestion des stocks..."
+                  fullWidth
+                  variant="outlined"
+                  error={!!error}
+                  helperText={error}
+                  sx={{ mb: 4 }}
+                />
+                
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="secondary"
+                  size="large"
+                  disabled={isLoading}
+                  sx={{
+                    px: 5,
+                    py: 1.5,
+                    fontSize: '1.125rem',
+                    fontWeight: 600,
+                    borderRadius: 2,
+                    textTransform: 'none',
+                  }}
+                >
+                  {isLoading ? (
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <CircularProgress size={24} sx={{ mr: 2, color: 'white' }} />
+                      Génération en cours...
+                    </Box>
+                  ) : (
+                    'Générer avec l\'IA'
+                  )}
+                </Button>
+              </Box>
+            </motion.div>
+          )}
+            {showChat && (
+            <motion.div
+              key="chat"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              style={{ width: '100%', height: '70vh' }}
+            >
+              {/* Rendu du ChatBox */}
+              {(() => { console.log('Rendu du ChatBox avec initialPrompt:', inputPrompt); return null; })()}
+              <ChatBox 
+                initialPrompt={inputPrompt} 
+                onClose={handleCloseChat}
+                onNewConversation={handleNewConversation}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </Container>
     </Box>
   );
