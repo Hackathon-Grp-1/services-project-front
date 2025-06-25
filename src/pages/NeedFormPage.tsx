@@ -82,8 +82,23 @@ const NeedFormPage = () => {
   };
   
   return (
-    <Box sx={{ py: 8, minHeight: '100vh', bgcolor: 'background.default' }}>
-      <Container maxWidth="md">
+    <Box sx={{ 
+      py: showChat ? 0 : 8, 
+      minHeight: showChat ? 'auto' : '100vh', 
+      height: 'auto',
+      bgcolor: 'background.default',
+      display: 'block',
+      position: 'relative',
+      marginBottom: 0
+    }}>
+      <Container 
+        maxWidth={showChat ? false : "md"} 
+        disableGutters={showChat} 
+        sx={{ 
+          display: 'block',
+          height: 'auto',
+          pb: showChat ? 0 : 'inherit' // Supprime le padding bottom quand le chat est affiché
+        }}>
         <AnimatePresence>
           {!showChat && (
             <motion.div
@@ -159,11 +174,16 @@ const NeedFormPage = () => {
             {showChat && (
             <motion.div
               key="chat"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              style={{ width: '100%', height: '70vh' }}
+              style={{ 
+                width: '100%',
+                height: 'calc(100vh - 70px)', // Hauteur réduite pour ne pas déborder sur le footer
+                display: 'block',
+                marginBottom: '20px' // Marge en bas pour éviter de toucher le footer
+              }}
             >
               {/* Rendu du ChatBox */}
               {(() => { console.log('Rendu du ChatBox avec initialPrompt:', inputPrompt); return null; })()}

@@ -35,6 +35,8 @@ export interface ChatResponse {
   professionals?: Array<{
     id: number;
     description: string;
+    tarif?: string;
+    skills?: string[];
     [key: string]: any;
   }>;
   request?: {
