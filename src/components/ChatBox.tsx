@@ -3,7 +3,7 @@ import { Box, TextField, Button, Typography, Paper, IconButton, CircularProgress
 import SendIcon from '@mui/icons-material/Send';
 import CloseIcon from '@mui/icons-material/Close';
 import { motion, AnimatePresence } from 'framer-motion';
-import { sendPrompt, startNewChat, type ChatResponse } from '../api/chatApi';
+import { sendPrompt, sendCreateServicePrompt, startNewChat, type ChatResponse } from '../api/chatApi';
 
 interface ChatMessage {
   content: string;
@@ -15,9 +15,10 @@ interface ChatBoxProps {
   initialPrompt?: string;
   onClose: () => void;
   onNewConversation?: () => void;
+  chatType?: 'search' | 'create_service';
 }
 
-const ChatBox = ({ initialPrompt, onClose, onNewConversation }: ChatBoxProps) => {
+const ChatBox = ({ initialPrompt, onClose, onNewConversation, chatType = 'search' }: ChatBoxProps) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState(initialPrompt || '');
   const [isLoading, setIsLoading] = useState(false);
@@ -25,7 +26,7 @@ const ChatBox = ({ initialPrompt, onClose, onNewConversation }: ChatBoxProps) =>
   const initialPromptSent = useRef(false);
 
   useEffect(() => {
-    console.log('ChatBox monté, initialPrompt:', initialPrompt);
+    console.log('ChatBox monté, initialPrompt:', initialPrompt, 'chatType:', chatType);
     
     // Vérifie si l'initialPrompt existe et n'a pas déjà été envoyé
     if (initialPrompt && !initialPromptSent.current) {
@@ -42,7 +43,10 @@ const ChatBox = ({ initialPrompt, onClose, onNewConversation }: ChatBoxProps) =>
       setMessages([initialMessage]);
       setIsLoading(true);
       
-      sendPrompt(initialPrompt)
+      // Utiliser la fonction appropriée selon le type de chat
+      const sendFunction = chatType === 'create_service' ? sendCreateServicePrompt : sendPrompt;
+      
+      sendFunction(initialPrompt)
         .then(response => {
           console.log('Réponse reçue pour le message initial:', response);
           
@@ -130,7 +134,7 @@ const ChatBox = ({ initialPrompt, onClose, onNewConversation }: ChatBoxProps) =>
   const sentMessages = useRef(new Set<string>());
   
   const handleSendMessage = async () => {
-    console.log('handleSendMessage appelé avec message:', newMessage);
+    console.log('handleSendMessage appelé avec message:', newMessage, 'chatType:', chatType);
     
     if (!newMessage.trim() || isLoading) {
       console.log('Message vide ou chargement en cours, abandon');
@@ -167,8 +171,10 @@ const ChatBox = ({ initialPrompt, onClose, onNewConversation }: ChatBoxProps) =>
     console.log('isLoading mis à true');
     
     try {
-      console.log('Envoi du prompt au webhook:', newMessage);
-      const response = await sendPrompt(newMessage);
+      // Utiliser la fonction appropriée selon le type de chat
+      const sendFunction = chatType === 'create_service' ? sendCreateServicePrompt : sendPrompt;
+      console.log('Envoi du prompt au webhook avec type:', chatType, 'message:', newMessage);
+      const response = await sendFunction(newMessage);
       console.log('Réponse reçue du webhook:', response);
       
       // Nouvelle structure de traitement pour le format n8n
@@ -268,7 +274,9 @@ const ChatBox = ({ initialPrompt, onClose, onNewConversation }: ChatBoxProps) =>
         justifyContent: 'space-between',
         alignItems: 'center'
       }}>
-        <Typography variant="h6">Discussion avec l'IA</Typography>
+        <Typography variant="h6">
+          {chatType === 'create_service' ? 'Création de service avec l\'IA' : 'Discussion avec l\'IA'}
+        </Typography>
         <Box>
           <IconButton 
             size="small" 

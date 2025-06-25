@@ -40,6 +40,7 @@ const navItems: NavItemType[] = [
       { label: 'Marketing', path: '/services/marketing' },
     ]
   },
+  { label: 'Proposer un service', path: '/create-service' },
   { label: 'Comment ça marche', path: '/#how-it-works' },
   { label: 'Tarifs', path: '/pricing' },
   { label: 'À propos', path: '/about' },
