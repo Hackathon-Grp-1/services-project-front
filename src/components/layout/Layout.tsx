@@ -10,13 +10,18 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Navbar />      <Box 
+      <Navbar />
+      <Box 
         component="main" 
         sx={{ 
           flexGrow: 1,
+          display: 'flex',
+          flexDirection: 'column',
           // Add top padding to account for the fixed navbar
-          // Height is different depending on screen size, so we match the navbar heights
-          pt: { xs: '64px', md: '72px' }
+          pt: { xs: '64px', md: '72px' },
+          // Ensure this container has appropriate space
+          height: 'auto',
+          overflow: 'visible'
         }}
       >
         {children}
