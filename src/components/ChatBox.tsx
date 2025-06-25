@@ -389,8 +389,21 @@ const ChatBox = ({ initialPrompt, onClose, onNewConversation }: ChatBoxProps) =>
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // État pour suivre si le chat vient d'être initialisé
+  const [isInitialRender, setIsInitialRender] = useState(true);
+
   useEffect(() => {
-    // Assurer que le scroll vers le bas se produit après le rendu
+    // Si c'est le premier rendu ou que le nombre de messages est <= 2 et que c'est l'init
+    if (isInitialRender && messages.length <= 2) {
+      console.log('Premier rendu du chat - pas de scroll');
+      if (messages.length === 2) {
+        // Une fois que le premier message et sa réponse sont chargés, ce n'est plus le rendu initial
+        setIsInitialRender(false);
+      }
+      return;
+    }
+    
+    // Pour les messages suivants, faire défiler vers le bas
     const timeoutId = setTimeout(() => {
       scrollToBottom();
     }, 100);
@@ -399,7 +412,7 @@ const ChatBox = ({ initialPrompt, onClose, onNewConversation }: ChatBoxProps) =>
     
     // Nettoyage du timeout lors du démontage
     return () => clearTimeout(timeoutId);
-  }, [messages]);
+  }, [messages, isInitialRender]);
 
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
