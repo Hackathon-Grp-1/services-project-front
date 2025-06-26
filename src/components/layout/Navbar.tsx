@@ -1,7 +1,7 @@
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import CloseIcon from '@mui/icons-material/Close';
 import MenuIcon from '@mui/icons-material/Menu';
 import {
+  Alert,
   AppBar,
   Box,
   Button,
@@ -11,10 +11,7 @@ import {
   List,
   ListItem,
   ListItemText,
-  Menu,
-  MenuItem,
   Snackbar,
-  Alert,
   Toolbar,
   Typography,
   useMediaQuery
@@ -28,7 +25,6 @@ import { isAnchorLink, scrollToElement } from '../../utils/scrollHelper';
 interface NavItemType {
   label: string;
   path: string;
-  dropdown?: Array<{ label: string; path: string }>;
 }
 
 const Navbar = () => {
@@ -41,24 +37,11 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [logoutInfo, setLogoutInfo] = useState(false);
 
-  // For dropdowns
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [openMenu, setOpenMenu] = useState<string | null>(null);
-
   // Navigation items - change based on authentication
   const getNavItems = (): NavItemType[] => {
     let baseItems: NavItemType[] = [
       { label: 'Accueil', path: '/' },
-      {
-        label: 'Trouver un service',
-        path: '#',
-        dropdown: [
-          { label: 'Consultation', path: '/services/consultation' },
-          { label: 'Développement', path: '/services/development' },
-          { label: 'Design', path: '/services/design' },
-          { label: 'Marketing', path: '/services/marketing' },
-        ]
-      },
+      { label: 'Trouver un service', path: '/need-form' },
       { label: 'Comment ça marche', path: '/#how-it-works' },
       { label: 'Tarifs', path: '/pricing' },
       { label: 'À propos', path: '/about' },
@@ -99,16 +82,6 @@ const Navbar = () => {
     setMobileOpen(!mobileOpen);
   };
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, menuName: string) => {
-    setAnchorEl(event.currentTarget);
-    setOpenMenu(menuName);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    setOpenMenu(null);
-  };
-
   const navigate = useNavigate();
 
   const handleMobileNavClick = (path: string, e: React.MouseEvent) => {
@@ -128,12 +101,12 @@ const Navbar = () => {
       }
     }
   };
-  
+
   const handleLogout = () => {
     logout();
     setLogoutInfo(true);
     navigate('/');
-  } 
+  }
 
   // Logo component
   const Logo = ({ isScrolled }: { isScrolled: boolean }) => {
@@ -143,7 +116,7 @@ const Navbar = () => {
         <Typography
           variant="h6"
           component={RouterLink}
-          to={isLoggedIn ? "/dashboard" : "/"}
+          to={isLoggedIn ? "/" : "/"}
           sx={{
             fontFamily: "'Orbitron', sans-serif",
             fontWeight: 600,
@@ -189,7 +162,7 @@ const Navbar = () => {
                 transition: 'all 0.3s ease',
               }}
             >
-              Services
+              Services.cio
             </Typography>
             <Typography
               variant="caption"
@@ -231,67 +204,22 @@ const Navbar = () => {
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         {navItems.map((item) => (
           <Box key={item.label} sx={{ position: 'relative', mx: scrolled ? 0.75 : 1, transition: 'all 0.3s ease' }}>
-            {item.dropdown ? (
-              <>
-                <Button
-                  color="inherit"
-                  onClick={(e) => handleMenuOpen(e, item.label)}
-                  endIcon={<ArrowDropDownIcon />}
-                  sx={{
-                    textTransform: 'none',
-                    fontWeight: 500,
-                    py: scrolled ? 0.5 : 0.75,
-                    px: scrolled ? 1 : 1.5,
-                    fontSize: scrolled ? '0.9rem' : '1rem',
-                    transition: 'all 0.3s ease'
-                  }}
-                >
-                  {item.label}
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  open={openMenu === item.label}
-                  onClose={handleMenuClose}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'center',
-                  }}
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'center',
-                  }}
-                >
-                  {item.dropdown.map((dropdownItem) => (
-                    <MenuItem
-                      key={dropdownItem.label}
-                      component={RouterLink}
-                      to={dropdownItem.path}
-                      onClick={handleMenuClose}
-                      sx={{ minWidth: 150 }}
-                    >
-                      {dropdownItem.label}
-                    </MenuItem>
-                  ))}
-                </Menu>
-              </>
-            ) : (
-              <Button
-                color="inherit"
-                component={RouterLink}
-                to={item.path}
-                onClick={(e) => handleNavClick(item.path, e)}
-                sx={{
-                  textTransform: 'none',
-                  fontWeight: 500,
-                  py: scrolled ? 0.5 : 0.75,
-                  px: scrolled ? 1 : 1.5,
-                  fontSize: scrolled ? '0.9rem' : '1rem',
-                  transition: 'all 0.3s ease'
-                }}
-              >
-                {item.label}
-              </Button>
-            )}
+            <Button
+              color="inherit"
+              component={RouterLink}
+              to={item.path}
+              onClick={(e) => handleNavClick(item.path, e)}
+              sx={{
+                textTransform: 'none',
+                fontWeight: 500,
+                py: scrolled ? 0.5 : 0.75,
+                px: scrolled ? 1 : 1.5,
+                fontSize: scrolled ? '0.9rem' : '1rem',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              {item.label}
+            </Button>
           </Box>
         ))}
       </Box>
@@ -312,8 +240,8 @@ const Navbar = () => {
           <ListItem
             key={item.label}
             component={RouterLink}
-            to={item.dropdown ? '#' : item.path}
-            onClick={(e) => item.dropdown ? null : handleMobileNavClick(item.path, e)}
+            to={item.path}
+            onClick={(e) => handleMobileNavClick(item.path, e)}
           >
             <ListItemText
               primary={item.label}
@@ -321,25 +249,6 @@ const Navbar = () => {
             />
           </ListItem>
         ))}
-        {/* Add dropdown items in mobile as well */}
-        {navItems
-          .filter(item => item.dropdown)
-          .flatMap(item => item.dropdown || [])
-          .map(subItem => (
-            <ListItem
-              key={subItem.label}
-              component={RouterLink}
-              to={subItem.path}
-              sx={{ pl: 4 }}
-              onClick={handleDrawerToggle}
-            >
-              <ListItemText
-                primary={subItem.label}
-                sx={{ color: theme.palette.text.secondary }}
-              />
-            </ListItem>
-          ))
-        }
       </List>
       <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
         {isLoggedIn ? (
@@ -363,17 +272,17 @@ const Navbar = () => {
           </>
         ) : (
           <>
-            <Button 
-              variant="outlined" 
+            <Button
+              variant="outlined"
               fullWidth
               component={RouterLink}
               to="/login"
             >
               Se connecter
             </Button>
-            <Button 
-              variant="contained" 
-              color="secondary" 
+            <Button
+              variant="contained"
+              color="secondary"
               fullWidth
               component={RouterLink}
               to="/register"
@@ -403,12 +312,12 @@ const Navbar = () => {
         </Alert>
       </Snackbar>
       <Container maxWidth="xl">
-        <Toolbar 
-          sx={{ 
-            justifyContent: 'space-between', 
-            p: { 
-              xs: scrolled ? '0.5rem' : '1rem', 
-              sm: scrolled ? '0.75rem 2rem' : '1rem 2rem' 
+        <Toolbar
+          sx={{
+            justifyContent: 'space-between',
+            p: {
+              xs: scrolled ? '0.5rem' : '1rem',
+              sm: scrolled ? '0.75rem 2rem' : '1rem 2rem'
             },
             minHeight: scrolled ? { xs: '56px', md: '64px' } : { xs: '64px', md: '72px' },
             transition: 'all 0.3s ease',
@@ -475,17 +384,17 @@ const Navbar = () => {
                   </>
                 ) : (
                   <>
-                    <Button 
-                      variant="outlined" 
-                      color="inherit" 
+                    <Button
+                      variant="outlined"
+                      color="inherit"
                       sx={{ borderColor: 'white', textTransform: 'none', py: scrolled ? 0.5 : 0.75, transition: 'all 0.3s ease' }}
                       component={RouterLink}
                       to="/login"
                     >
                       Se connecter
                     </Button>
-                    <Button 
-                      variant="contained" 
+                    <Button
+                      variant="contained"
                       color="secondary"
                       sx={{ textTransform: 'none', py: scrolled ? 0.5 : 0.75, transition: 'all 0.3s ease' }}
                       component={RouterLink}
@@ -500,6 +409,7 @@ const Navbar = () => {
           )}
         </Toolbar>
       </Container>
+
       {/* Mobile drawer */}
       <Drawer
         variant="temporary"
