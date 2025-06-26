@@ -1,99 +1,64 @@
 import { useState, useRef } from 'react';
-import { Box, Button, Container, TextField, Typography, CircularProgress, Snackbar, Alert } from '@mui/material';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Box, Button, Container, TextField, Typography, CircularProgress } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
-import { fetchServicePaths } from '../api/mockApi';
-import { useServiceStore } from '../store/serviceStore';
 import ChatBox from '../components/ChatBox';
 import { startNewChat } from '../api/chatApi';
-import { useAuth } from '../contexts/AuthContext';
+import { useServiceStore } from '../store/serviceStore';
 
-const NeedFormPage = () => {
+const CreateServicePage = () => {
   const [inputPrompt, setInputPrompt] = useState('');
   const [error, setError] = useState('');
   const [showChat, setShowChat] = useState(false);
-  const [loginSuccess, setLoginSuccess] = useState(() => {
-    if (window.history.state && window.history.state.usr && window.history.state.usr.justLoggedIn) {
-      return true;
-    }
-    return false;
-  });
-  const [authToast, setAuthToast] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
   const formRef = useRef<HTMLFormElement>(null);
-    
   const { 
     setPrompt, 
     setServicePaths, 
     isLoading, 
-    setIsLoading
-  } = useServiceStore();
-
-  const { isLoggedIn } = useAuth();
+    setIsLoading 
+  } = useServiceStore(); 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isLoggedIn) {
-      navigate('/login', { state: { mustAuth: true } });
-      return;
-    }
-    console.log('Formulaire soumis avec prompt:', inputPrompt);
+    console.log('Formulaire de création de service soumis avec prompt:', inputPrompt);
     
     if (!inputPrompt.trim()) {
-      setError('Veuillez décrire votre besoin');
+      setError('Veuillez décrire le service que vous souhaitez proposer');
       console.log('Erreur: prompt vide');
       return;
     }
     
     setError('');
     setIsLoading(true);
-    console.log('Chargement activé, initialisation du chat...');
+    console.log('Initialisation du chat de création de service...');
     
     try {
       // Démarrer une nouvelle session de chat
       const sessionId = startNewChat();
-      console.log('Nouvelle session de chat créée, ID:', sessionId);
-      
-      // Store the prompt in global state
-      setPrompt(inputPrompt);
-      console.log('Prompt stocké dans le state global');
+      console.log('Nouvelle session de chat créée pour création de service, ID:', sessionId);
       
       // Afficher le chat
       setShowChat(true);
-      console.log('showChat mis à true, le chat devrait s\'afficher');
-      
-      // On n'utilise plus le mock API et la navigation directe vers service-paths
-      // mais on garde le code commenté au cas où on en aurait besoin plus tard
-      /*
-      // Call the mock API
-      const paths = await fetchServicePaths(inputPrompt);
-      
-      // Store the service paths in global state
-      setServicePaths(paths);
-      
-      // Navigate to the service paths page
-      navigate('/service-paths');
-      */
+      console.log('showChat mis à true, le chat de création de service devrait s\'afficher');
     } catch (err) {
-      console.error('Error starting chat:', err);
+      console.error('Error starting chat for service creation:', err);
       setError('Une erreur est survenue. Veuillez réessayer.');
       setShowChat(false);
-    } finally {
+    }
+    finally {
       setIsLoading(false);
       console.log('Chargement désactivé');
     }
   };
 
   const handleCloseChat = () => {
-    console.log('Fermeture du chat demandée');
+    console.log('Fermeture du chat de création de service demandée');
     setShowChat(false);
     setInputPrompt('');
     setError('');
   };
 
   const handleNewConversation = () => {
-    console.log('Nouvelle conversation demandée');
+    console.log('Nouvelle conversation de création de service demandée');
     setInputPrompt('');
     setError('');
   };
@@ -108,11 +73,6 @@ const NeedFormPage = () => {
       position: 'relative',
       marginBottom: 0
     }}>
-      <Snackbar open={loginSuccess} autoHideDuration={2000} onClose={() => setLoginSuccess(false)} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-        <Alert severity="success" sx={{ width: '100%' }}>
-          Connexion réussie !
-        </Alert>
-      </Snackbar>
       <Container 
         maxWidth={showChat ? false : "md"} 
         disableGutters={showChat} 
@@ -136,10 +96,10 @@ const NeedFormPage = () => {
                   component="h1" 
                   sx={{ fontFamily: "'Inter', sans-serif", mb: 2 }}
                 >
-                  Décrivez votre besoin
+                  Proposez vos services
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 1 }}>
-                  Partagez les détails de votre projet pour que notre IA puisse vous proposer les meilleurs parcours de services.
+                  Décrivez vos compétences et services pour que notre IA puisse vous aider à créer votre profil de prestataire.
                 </Typography>
               </Box>
               
@@ -158,7 +118,7 @@ const NeedFormPage = () => {
                   rows={8}
                   value={inputPrompt}
                   onChange={(e) => setInputPrompt(e.target.value)}
-                  placeholder="Ex: Je souhaite créer un site e-commerce pour vendre mes produits artisanaux avec une boutique en ligne, un système de paiement sécurisé et une gestion des stocks..."
+                  placeholder="Ex: Je suis développeur web freelance avec 5 ans d'expérience. Je maîtrise React, Node.js et MongoDB. Je propose des services de développement d'applications web, maintenance et optimisation de sites existants. Mon taux horaire est de 75€..."
                   fullWidth
                   variant="outlined"
                   error={!!error}
@@ -187,7 +147,7 @@ const NeedFormPage = () => {
                       Génération en cours...
                     </Box>
                   ) : (
-                    'Générer avec l\'IA'
+                    'Créer mon service avec l\'IA'
                   )}
                 </Button>
               </Box>
@@ -196,9 +156,9 @@ const NeedFormPage = () => {
             {showChat && (
             <motion.div
               key="chat"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
               style={{ 
                 width: '100%',
@@ -213,6 +173,7 @@ const NeedFormPage = () => {
                 initialPrompt={inputPrompt} 
                 onClose={handleCloseChat}
                 onNewConversation={handleNewConversation}
+                chatType="create_service"
               />
             </motion.div>
           )}
@@ -222,4 +183,4 @@ const NeedFormPage = () => {
   );
 };
 
-export default NeedFormPage;
+export default CreateServicePage; 

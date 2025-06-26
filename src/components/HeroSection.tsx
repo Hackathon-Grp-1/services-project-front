@@ -15,6 +15,10 @@ const HeroSection = () => {
     }
   };
 
+  const handleProposeService = () => {
+    navigate("/create-service");
+  };
+
   return (
     <Box
       component={motion.div}
@@ -163,7 +167,7 @@ const HeroSection = () => {
               fontFamily: "'Inter', sans-serif",
             }}
           >
-            Vous avez une idée ? On assemble l’équipe pour la concrétiser.
+            Vous avez une idée ? On assemble l'équipe pour la concrétiser.
           </Typography>
           <Typography
             variant="h2"
@@ -179,7 +183,7 @@ const HeroSection = () => {
           >
             Une seule plateforme. Une seule facture. Un projet complet.
           </Typography>
-          <Box>
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center' }}>
             <Button
               variant="contained"
               color="secondary"
@@ -196,6 +200,29 @@ const HeroSection = () => {
               }}
             >
               Exprimer mon besoin
+            </Button>
+            <Button
+              variant="outlined"
+              color="inherit"
+              size="large"
+              onClick={handleProposeService}
+              sx={{
+                px: 5,
+                py: 1.5,
+                fontSize: "1.125rem",
+                fontWeight: 600,
+                borderRadius: 2,
+                textTransform: "none",
+                fontFamily: "'Inter', sans-serif",
+                borderColor: "white",
+                color: "white",
+                "&:hover": {
+                  borderColor: "white",
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                },
+              }}
+            >
+              Proposer mes services
             </Button>
           </Box>
         </Box>
