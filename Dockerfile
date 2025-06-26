@@ -1,0 +1,13 @@
+FROM node:22 AS build
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm clean-install
+COPY . .
+RUN npm run build
+
+FROM nginx:mainline-alpine3.22 AS production
+COPY --from=build /app/dist /usr/share/nginx/html
+EXPOSE 3008
+CMD ["nginx", "-g", "daemon off;"]
