@@ -27,9 +27,12 @@ const NeedFormPage = () => {
     setPrompt, 
     setServicePaths, 
     isLoading, 
-    setIsLoading,
-    isLoggedIn
-  } = useServiceStore();  const handleSubmit = async (e: React.FormEvent) => {
+    setIsLoading
+  } = useServiceStore();
+
+  const { isLoggedIn } = useAuth();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isLoggedIn) {
       navigate('/login', { state: { mustAuth: true } });
