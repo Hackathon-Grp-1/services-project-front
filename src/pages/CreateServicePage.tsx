@@ -1,4 +1,7 @@
-import { SmartToy as SmartToyIcon } from '@mui/icons-material';
+import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
+import KeyboardCommandKeyIcon from '@mui/icons-material/KeyboardCommandKey';
+import KeyboardControlKeyIcon from '@mui/icons-material/KeyboardControlKey';
+import KeyboardReturnIcon from '@mui/icons-material/KeyboardReturn';
 import { Box, Button, CircularProgress, Container, TextField, Typography } from '@mui/material';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
@@ -165,18 +168,28 @@ const CreateServicePage = () => {
                     </Box>
                   ) : (
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <SmartToyIcon sx={{ mr: 1 }} />
+                      <AutoAwesomeRoundedIcon sx={{ mr: 1 }} />
                       Créer mon service avec l&apos;IA
                       <Box
                         component="span"
                         sx={{
-                          ml: 1,
-                          fontSize: '0.875rem',
-                          opacity: 0.8,
-                          fontFamily: 'monospace'
+                          ml: 2,
+                          display: 'flex',
+                          alignItems: 'center',
+                          bgcolor: 'rgba(255,255,255,0.35)',
+                          borderRadius: 2,
+                          px: 1.5,
+                          py: 0.5,
+                          fontWeight: 500,
+                          fontSize: '1rem',
+                          gap: 0.5,
+                          boxShadow: 1,
                         }}
                       >
-                        ({isMac ? '⌘' : 'Ctrl'}+↵)
+                        {isMac
+                          ? <KeyboardCommandKeyIcon sx={{ fontSize: '1.1rem' }} />
+                          : <KeyboardControlKeyIcon sx={{ fontSize: '1.1rem' }} />}
+                        <KeyboardReturnIcon sx={{ fontSize: '1.1rem', ml: 0.5 }} />
                       </Box>
                     </Box>
                   )}
