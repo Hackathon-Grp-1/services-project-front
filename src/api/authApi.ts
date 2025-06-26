@@ -46,20 +46,21 @@ export interface RegisterCredentials {
   phoneNumber: string;
   password: string;
   confirmPassword: string;
+  role: string; // Ajout du champ role pour correspondre à l'API backend
 }
 
 // Login function
 export const login = async (credentials: LoginCredentials): Promise<AuthResponse> => {
   try {
     const response = await axios.post(`${API_BASE_URL}/auth/login`, credentials);
-    
+
     // Store token in localStorage
     if (response.data.accessToken) {
       localStorage.setItem('authToken', response.data.accessToken);
       localStorage.setItem('user', JSON.stringify(response.data.user));
       localStorage.setItem('tokenExpiry', new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString()); // 4 hours
     }
-    
+
     return response.data;
   } catch (error) {
     console.error('Login error:', error);
