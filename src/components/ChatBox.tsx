@@ -19,6 +19,7 @@ import {
   sendPrompt,
   startNewChat,
 } from "../api/chatApi";
+import { useAuth } from '../contexts/AuthContext';
 
 interface ChatMessage {
   content: string;
@@ -648,6 +649,7 @@ const ChatBox = ({
   onNewConversation,
   chatType = "search",
 }: ChatBoxProps) => {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState(initialPrompt || "");
   const [isLoading, setIsLoading] = useState(false);
@@ -852,6 +854,19 @@ const ChatBox = ({
 
   // Map pour tracker les messages déjà envoyés afin d'éviter les doublons
   const sentMessages = useRef(new Set<string>());
+
+  // Fonction utilitaire pour générer les initiales
+  const getUserInitials = () => {
+    if (user) {
+      if (user.firstName && user.lastName) {
+        return `${user.firstName[0] ?? ''}${user.lastName[0] ?? ''}`.toUpperCase();
+      }
+      if (user.email) {
+        return user.email[0].toUpperCase();
+      }
+    }
+    return 'U';
+  };
 
   const handleSendMessage = async () => {
     console.log(
@@ -1202,7 +1217,7 @@ const ChatBox = ({
                               fontSize: "0.75rem",
                             }}
                           >
-                            U
+                            {getUserInitials()}
                           </Box>
                         )}
                       </Box>
