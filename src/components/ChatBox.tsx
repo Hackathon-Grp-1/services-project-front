@@ -365,14 +365,289 @@ const formatMessageContent = (content: string): ReactElement => {
     return null;
   };
 
-  // Check if content has multiple questions in a single paragraph
+  // Check if content has bullet points first (priority over questions)
+  const lines = content.split("\n");
+  const hasBulletPoints = lines.some(line => /^-\s+.+/.test(line.trim()));
+  const hasNumberedLists = lines.some(line => /^\d+\.\s+.+/.test(line.trim()));
+
+  // If there are bullet points or numbered lists, process them normally instead of using question detection
+  if (hasBulletPoints || hasNumberedLists) {
+    const formattedLines: ReactElement[] = [];
+    let inBulletList = false;
+    let inNumberedList = false;
+    let currentList: ReactElement[] = [];
+
+    // This will identify bullet patterns in the response from the API
+    const bulletPattern = /^-\s+.+/;
+    const numberedPattern = /^\d+\.\s+.+/;
+
+    // Special handling for the specific structure in the examples
+    // Looking for structured data like "request": {...}
+    const jsonPattern =
+      /(Structure complète de la réponse|message|ready|professionals|request):/i;
+
+    lines.forEach((line, index) => {
+      // Check for JSON pattern to avoid formatting structured data as bullets
+      if (jsonPattern.test(line)) {
+        // If we were previously in a list, add it to the formatted content
+        if (inBulletList || inNumberedList) {
+          if (inBulletList) {
+            formattedLines.push(
+              <ul
+                key={`ul-${index}`}
+                style={{
+                  paddingLeft: "20px",
+                  marginTop: "8px",
+                  marginBottom: "8px",
+                }}
+              >
+                {currentList}
+              </ul>
+            );
+          } else {
+            formattedLines.push(
+              <ol
+                key={`ol-${index}`}
+                style={{
+                  paddingLeft: "20px",
+                  marginTop: "8px",
+                  marginBottom: "8px",
+                }}
+              >
+                {currentList}
+              </ol>
+            );
+          }
+          inBulletList = false;
+          inNumberedList = false;
+          currentList = [];
+        }
+
+        // Add the JSON line without formatting
+        formattedLines.push(
+          <Typography
+            key={`text-${index}`}
+            paragraph
+            margin="dense"
+            component="pre"
+            sx={{ fontFamily: "monospace" }}
+          >
+            {line}
+          </Typography>
+        );
+        return; // Skip to next line
+      }
+
+      // Check for markdown headers
+      const headerPattern = /^(#{1,6})\s+(.+)$/;
+      const headerMatch = line.trim().match(headerPattern);
+      if (headerMatch) {
+        // If we were previously in a list, add it to the formatted content
+        if (inBulletList || inNumberedList) {
+          if (inBulletList) {
+            formattedLines.push(
+              <ul
+                key={`ul-${index}`}
+                style={{
+                  paddingLeft: "20px",
+                  marginTop: "8px",
+                  marginBottom: "8px",
+                }}
+              >
+                {currentList}
+              </ul>
+            );
+          } else {
+            formattedLines.push(
+              <ol
+                key={`ol-${index}`}
+                style={{
+                  paddingLeft: "20px",
+                  marginTop: "8px",
+                  marginBottom: "8px",
+                }}
+              >
+                {currentList}
+              </ol>
+            );
+          }
+          inBulletList = false;
+          inNumberedList = false;
+          currentList = [];
+        }
+
+        // Add the header with markdown formatting
+        formattedLines.push(
+          <Typography
+            key={`header-${index}`}
+            dangerouslySetInnerHTML={{ __html: convertMarkdownToHtml(line) }}
+            sx={markdownStyles}
+          />
+        );
+        return; // Skip to next line
+      }
+
+      // Check for bullet point
+      if (bulletPattern.test(line.trim())) {
+        if (!inBulletList || inNumberedList) {
+          // Close any existing numbered list
+          if (inNumberedList && currentList.length > 0) {
+            formattedLines.push(
+              <ol
+                key={`ol-${index}`}
+                style={{
+                  paddingLeft: "20px",
+                  marginTop: "8px",
+                  marginBottom: "8px",
+                }}
+              >
+                {currentList}
+              </ol>
+            );
+            currentList = [];
+          }
+          inBulletList = true;
+          inNumberedList = false;
+          if (currentList.length === 0) currentList = [];
+        }
+
+        const bulletContent = line.trim().substring(2);
+        currentList.push(
+          <Box
+            key={`bullet-${index}`}
+            component="li"
+            dangerouslySetInnerHTML={{
+              __html: convertMarkdownToHtml(bulletContent),
+            }}
+            sx={markdownStyles}
+          />
+        );
+      }
+      // Check for numbered list
+      else if (numberedPattern.test(line.trim())) {
+        if (!inNumberedList || inBulletList) {
+          // Close any existing bullet list
+          if (inBulletList && currentList.length > 0) {
+            formattedLines.push(
+              <ul
+                key={`ul-${index}`}
+                style={{
+                  paddingLeft: "20px",
+                  marginTop: "8px",
+                  marginBottom: "8px",
+                }}
+              >
+                {currentList}
+              </ul>
+            );
+            currentList = [];
+          }
+          inNumberedList = true;
+          inBulletList = false;
+          if (currentList.length === 0) currentList = [];
+        }
+
+        // Extract the number and the content
+        const dotIndex = line.indexOf(".");
+        const number = parseInt(line.substring(0, dotIndex).trim());
+        const content = line.substring(dotIndex + 1).trim();
+
+        currentList.push(
+          <Box
+            key={`number-${index}`}
+            component="li"
+            value={number}
+            dangerouslySetInnerHTML={{ __html: convertMarkdownToHtml(content) }}
+            sx={markdownStyles}
+          />
+        );
+      }
+      // Regular text
+      else {
+        // If we were previously in a list, add it to the formatted content
+        if (inBulletList && currentList.length > 0) {
+          formattedLines.push(
+            <ul
+              key={`ul-${index}`}
+              style={{
+                paddingLeft: "20px",
+                marginTop: "8px",
+                marginBottom: "8px",
+              }}
+            >
+              {currentList}
+            </ul>
+          );
+          inBulletList = false;
+          currentList = [];
+        } else if (inNumberedList && currentList.length > 0) {
+          formattedLines.push(
+            <ol
+              key={`ol-${index}`}
+              style={{
+                paddingLeft: "20px",
+                marginTop: "8px",
+                marginBottom: "8px",
+              }}
+            >
+              {currentList}
+            </ol>
+          );
+          inNumberedList = false;
+          currentList = [];
+        }
+
+        // Add the current line if it's not empty
+        if (line.trim()) {
+          formattedLines.push(
+            <Typography
+              key={`text-${index}`}
+              paragraph
+              margin="dense"
+              dangerouslySetInnerHTML={{ __html: convertMarkdownToHtml(line) }}
+              sx={markdownStyles}
+            />
+          );
+        } else if (index > 0 && index < lines.length - 1) {
+          // Add empty lines as breaks between paragraphs, but not at the beginning or end
+          formattedLines.push(
+            <Box key={`break-${index}`} sx={{ height: "8px" }} />
+          );
+        }
+      }
+    });
+
+    // Check if we need to close an open list
+    if (inBulletList && currentList.length > 0) {
+      formattedLines.push(
+        <ul
+          key="ul-final"
+          style={{ paddingLeft: "20px", marginTop: "8px", marginBottom: "8px" }}
+        >
+          {currentList}
+        </ul>
+      );
+    } else if (inNumberedList && currentList.length > 0) {
+      formattedLines.push(
+        <ol
+          key="ol-final"
+          style={{ paddingLeft: "20px", marginTop: "8px", marginBottom: "8px" }}
+        >
+          {currentList}
+        </ol>
+      );
+    }
+
+    return <>{formattedLines}</>;
+  }
+
+  // Check if content has multiple questions in a single paragraph (only if no bullet points)
   const formattedQuestions = formatMultipleQuestions(content);
   if (formattedQuestions) {
     return formattedQuestions;
   }
 
   // Process for bullet points - look for patterns like "- item" or "1. item"
-  const lines = content.split("\n");
   const formattedLines: ReactElement[] = [];
 
   let inBulletList = false;
@@ -1229,9 +1504,18 @@ const ChatBox = ({
                         }}
                       >
                         {msg.isUser ? (
-                          <Typography variant="body1" sx={{ color: "white" }}>
-                            {msg.content}
-                          </Typography>
+                          <Box
+                            dangerouslySetInnerHTML={{
+                              __html: convertMarkdownToHtml(msg.content.replace(/\n/g, '<br>'))
+                            }}
+                            sx={{
+                              ...markdownStyles,
+                              color: "white",
+                              "& *": {
+                                color: "white !important"
+                              }
+                            }}
+                          />
                         ) : (
                           formatMessageContent(msg.content)
                         )}
