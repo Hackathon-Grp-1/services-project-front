@@ -1,12 +1,22 @@
 import { Box, Button, Container, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useAuth } from '../contexts/AuthContext';
 
 const HeroSection = () => {
   const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
 
   const handleGetStarted = () => {
-    navigate("/need-form");
+    if (!isLoggedIn) {
+      navigate('/login', { state: { mustAuth: true } });
+    } else {
+      navigate("/need-form");
+    }
+  };
+
+  const handleProposeService = () => {
+    navigate("/create-service");
   };
 
   const handleProposeService = () => {

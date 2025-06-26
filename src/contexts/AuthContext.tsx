@@ -1,11 +1,11 @@
 import { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { login as apiLogin, logout as apiLogout, isAuthenticated, getCurrentUser } from '../api/authApi';
-import type { LoginCredentials, AuthResponse } from '../api/authApi';
+import type { LoginCredentials, AuthResponse, User } from '../api/authApi';
 
 interface AuthContextType {
   isLoggedIn: boolean;
-  user: any | null;
+  user: User | null;
   login: (credentials: LoginCredentials) => Promise<AuthResponse>;
   logout: () => void;
   loading: boolean;
@@ -16,7 +16,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(isAuthenticated());
-  const [user, setUser] = useState<any | null>(getCurrentUser());
+  const [user, setUser] = useState<User | null>(getCurrentUser());
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 

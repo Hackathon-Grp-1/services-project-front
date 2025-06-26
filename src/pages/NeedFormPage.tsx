@@ -1,26 +1,43 @@
 import { useState, useRef } from 'react';
-import { Box, Button, Container, TextField, Typography, CircularProgress } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { Box, Button, Container, TextField, Typography, CircularProgress, Snackbar, Alert } from '@mui/material';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchServicePaths } from '../api/mockApi';
 import { useServiceStore } from '../store/serviceStore';
 import ChatBox from '../components/ChatBox';
 import { startNewChat } from '../api/chatApi';
+import { useAuth } from '../contexts/AuthContext';
 
 const NeedFormPage = () => {
   const [inputPrompt, setInputPrompt] = useState('');
   const [error, setError] = useState('');
   const [showChat, setShowChat] = useState(false);
+  const [loginSuccess, setLoginSuccess] = useState(() => {
+    if (window.history.state && window.history.state.usr && window.history.state.usr.justLoggedIn) {
+      return true;
+    }
+    return false;
+  });
+  const [authToast, setAuthToast] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const formRef = useRef<HTMLFormElement>(null);
     
   const { 
     setPrompt, 
     setServicePaths, 
     isLoading, 
-    setIsLoading 
-  } = useServiceStore();  const handleSubmit = async (e: React.FormEvent) => {
+    setIsLoading
+  } = useServiceStore();
+
+  const { isLoggedIn } = useAuth();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isLoggedIn) {
+      navigate('/login', { state: { mustAuth: true } });
+      return;
+    }
     console.log('Formulaire soumis avec prompt:', inputPrompt);
     
     if (!inputPrompt.trim()) {
@@ -91,6 +108,11 @@ const NeedFormPage = () => {
       position: 'relative',
       marginBottom: 0
     }}>
+      <Snackbar open={loginSuccess} autoHideDuration={2000} onClose={() => setLoginSuccess(false)} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+        <Alert severity="success" sx={{ width: '100%' }}>
+          Connexion réussie !
+        </Alert>
+      </Snackbar>
       <Container 
         maxWidth={showChat ? false : "md"} 
         disableGutters={showChat} 

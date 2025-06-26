@@ -13,6 +13,8 @@ import {
   ListItemText,
   Menu,
   MenuItem,
+  Snackbar,
+  Alert,
   Toolbar,
   Typography,
   useMediaQuery
@@ -31,12 +33,13 @@ interface NavItemType {
 
 const Navbar = () => {
   const theme = useTheme();
-  const { user, isLoggedIn } = useAuth();
+  const { user, isLoggedIn, logout } = useAuth();
   // Solution 2 : Breakpoint custom avec navigation condensée
   const isMobile = useMediaQuery('(max-width:1236px)');
   const isCompact = useMediaQuery('(min-width:1237px) and (max-width:1300px)');
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [logoutInfo, setLogoutInfo] = useState(false);
 
   // For dropdowns
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -123,6 +126,12 @@ const Navbar = () => {
       }
     }
   };
+  
+  const handleLogout = () => {
+    logout();
+    setLogoutInfo(true);
+    navigate('/');
+  } 
 
   // Logo component
   const Logo = ({ isScrolled }: { isScrolled: boolean }) => {
@@ -330,19 +339,38 @@ const Navbar = () => {
         }
       </List>
       <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
-        {!isLoggedIn ? (
+        {isLoggedIn ? (
           <>
             <Button
               variant="outlined"
+              fullWidth
+              component={RouterLink}
+              to="/dashboard"
+            >
+              Mon espace
+            </Button>
+            <Button
+              variant="contained"
+              color="secondary"
+              fullWidth
+              onClick={handleLogout}
+            >
+              Se déconnecter
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button 
+              variant="outlined" 
               fullWidth
               component={RouterLink}
               to="/login"
             >
               Se connecter
             </Button>
-            <Button
-              variant="contained"
-              color="secondary"
+            <Button 
+              variant="contained" 
+              color="secondary" 
               fullWidth
               component={RouterLink}
               to="/register"
@@ -350,22 +378,6 @@ const Navbar = () => {
               S'inscrire
             </Button>
           </>
-        ) : (
-          <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="body2" sx={{ mb: 1 }}>
-              Connecté en tant que {user?.name || user?.email}
-            </Typography>
-            <Button
-              variant="outlined"
-              fullWidth
-              onClick={() => {
-                // TODO: Implement logout
-                console.log('Logout');
-              }}
-            >
-              Se déconnecter
-            </Button>
-          </Box>
         )}
       </Box>
     </Box>
@@ -382,20 +394,23 @@ const Navbar = () => {
         zIndex: (theme) => theme.zIndex.drawer + 1,
       }}
     >
-      <Container maxWidth="xl">
-        <Toolbar
-          sx={{
-            justifyContent: 'space-between',
-            p: {
-              xs: scrolled ? '0.5rem' : '1rem',
-              sm: scrolled ? '0.75rem 2rem' : '1rem 2rem'
+      <Snackbar open={logoutInfo} autoHideDuration={2000} onClose={() => setLogoutInfo(false)} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+        <Alert severity="info" sx={{ width: '100%' }}>
+          Vous avez été déconnecté.
+        </Alert>
+      </Snackbar>
+      <Container maxWidth="xl">        <Toolbar 
+          sx={{ 
+            justifyContent: 'space-between', 
+            p: { 
+              xs: scrolled ? '0.5rem' : '1rem', 
+              sm: scrolled ? '0.75rem 2rem' : '1rem 2rem' 
             },
             minHeight: scrolled ? { xs: '56px', md: '64px' } : { xs: '64px', md: '72px' },
             transition: 'all 0.3s ease',
           }}
         >
           <Logo isScrolled={scrolled} />
-
           {/* Mobile menu button */}
           {(isMobile || isCompact) && (
             <IconButton
@@ -407,84 +422,65 @@ const Navbar = () => {
               <MenuIcon />
             </IconButton>
           )}
-
-          {/* Desktop navigation - seulement pour les très grands écrans */}
-          {!isMobile && !isCompact && (
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <DesktopNav />
+          {/* Desktop navigation */}
+          {!isMobile && (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>              
+            <DesktopNav 
+                navItems={navItems}
+                openMenu={openMenu}
+                anchorEl={anchorEl}
+                handleMenuOpen={handleMenuOpen}
+                handleMenuClose={handleMenuClose}
+                isScrolled={scrolled}
+              />
               <Box sx={{ ml: 2, display: 'flex', gap: 1 }}>
-                {!isLoggedIn ? (
+                {isLoggedIn ? (
                   <>
                     <Button
                       variant="outlined"
                       color="inherit"
-                      sx={{
-                        borderColor: 'white',
-                        textTransform: 'none',
-                        py: scrolled ? 0.5 : 0.75,
-                        px: scrolled ? 1 : 1.5,
-                        fontSize: scrolled ? '0.85rem' : '0.9rem',
-                        transition: 'all 0.3s ease',
-                      }}
+                      sx={{ borderColor: 'white', textTransform: 'none', py: scrolled ? 0.5 : 0.75, transition: 'all 0.3s ease' }}
+                      component={RouterLink}
+                      to="/dashboard"
+                    >
+                      Mon espace
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      sx={{ textTransform: 'none', py: scrolled ? 0.5 : 0.75, transition: 'all 0.3s ease' }}
+                      onClick={handleLogout}
+                    >
+                      Se déconnecter
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button 
+                      variant="outlined" 
+                      color="inherit" 
+                      sx={{ borderColor: 'white', textTransform: 'none', py: scrolled ? 0.5 : 0.75, transition: 'all 0.3s ease' }}
                       component={RouterLink}
                       to="/login"
                     >
                       Se connecter
                     </Button>
-                    <Button
-                      variant="contained"
+                    <Button 
+                      variant="contained" 
                       color="secondary"
-                      sx={{
-                        textTransform: 'none',
-                        py: scrolled ? 0.5 : 0.75,
-                        px: scrolled ? 1 : 1.5,
-                        fontSize: scrolled ? '0.85rem' : '0.9rem',
-                        transition: 'all 0.3s ease',
-                      }}
+                      sx={{ textTransform: 'none', py: scrolled ? 0.5 : 0.75, transition: 'all 0.3s ease' }}
                       component={RouterLink}
                       to="/register"
                     >
                       S'inscrire
                     </Button>
                   </>
-                ) : (
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: 'white',
-                        fontSize: scrolled ? '0.8rem' : '0.85rem',
-                        transition: 'all 0.3s ease',
-                      }}
-                    >
-                      {user?.name || user?.email}
-                    </Typography>
-                    <Button
-                      variant="outlined"
-                      color="inherit"
-                      sx={{
-                        borderColor: 'white',
-                        textTransform: 'none',
-                        py: scrolled ? 0.5 : 0.75,
-                        px: scrolled ? 1 : 1.5,
-                        fontSize: scrolled ? '0.85rem' : '0.9rem',
-                        transition: 'all 0.3s ease',
-                      }}
-                      onClick={() => {
-                        // TODO: Implement logout
-                        console.log('Logout');
-                      }}
-                    >
-                      Déconnexion
-                    </Button>
-                  </Box>
                 )}
               </Box>
             </Box>
           )}
         </Toolbar>
       </Container>
-
       {/* Mobile drawer */}
       <Drawer
         variant="temporary"

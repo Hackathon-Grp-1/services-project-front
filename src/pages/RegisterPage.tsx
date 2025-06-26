@@ -1,21 +1,33 @@
 import { useState } from 'react';
-import { Box, Typography, TextField, Button, Container, Paper, InputAdornment, IconButton, Checkbox, FormControlLabel } from '@mui/material';
+import { Box, Typography, TextField, Button, Container, Paper, InputAdornment, IconButton, Checkbox, FormControlLabel, Snackbar, Alert } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { register } from '../api/authApi';
 
 const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
+    phoneNumber: '',
+    comment: '',
     password: '',
-    companyName: '',
+    confirmPassword: '',
     acceptTerms: false
   });
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<{[key:string]: boolean}>({});
+  const navigate = useNavigate();
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
+  };
+  const handleClickShowConfirmPassword = () => {
+    setShowConfirmPassword(!showConfirmPassword);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,11 +38,70 @@ const RegisterPage = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // This would be replaced with actual registration logic
-    console.log('Register attempt with:', formData);
-    // Placeholder for registration API call
+    setError(null);
+    setFieldErrors({});
+    // Validation côté client
+    const errors: {[key:string]: boolean} = {};
+    if (!formData.firstName.trim()) errors.firstName = true;
+    if (!formData.lastName.trim()) errors.lastName = true;
+    if (!formData.email.trim()) errors.email = true;
+    if (!formData.phoneNumber.trim()) errors.phoneNumber = true;
+    if (!formData.password) errors.password = true;
+    if (!formData.confirmPassword) errors.confirmPassword = true;
+    if (Object.keys(errors).length > 0) {
+      setError('Merci de remplir tous les champs obligatoires.');
+      setFieldErrors(errors);
+      return;
+    }
+    // Email format
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(formData.email)) {
+      setError("L'adresse email n'est pas valide.");
+      setFieldErrors({ email: true });
+      return;
+    }
+    // Phone format (simple check)
+    if (!/^\+?\d{8,}$/.test(formData.phoneNumber)) {
+      setError('Le numéro de téléphone est invalide.');
+      setFieldErrors({ phoneNumber: true });
+      return;
+    }
+    // Password match
+    if (formData.password !== formData.confirmPassword) {
+      setError('Les mots de passe ne correspondent pas.');
+      setFieldErrors({ password: true, confirmPassword: true });
+      return;
+    }
+    // Password strength (exemple simple)
+    if (formData.password.length < 8) {
+      setError('Le mot de passe doit contenir au moins 8 caractères.');
+      setFieldErrors({ password: true });
+      return;
+    }
+    setLoading(true);
+    try {
+      await register({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        comment: formData.comment,
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword
+      });
+      setSuccess(true);
+      setTimeout(() => {
+        navigate('/login', { state: { registered: true } });
+      }, 1800);
+    } catch (err: any) {
+      // Gestion des erreurs API
+      let apiMsg = err?.response?.data?.message;
+      if (Array.isArray(apiMsg)) apiMsg = apiMsg.join(' ');
+      setError(apiMsg || 'Erreur lors de l’inscription. Veuillez réessayer.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -40,7 +111,16 @@ const RegisterPage = () => {
           <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ mb: 4 }}>
             Créez votre compte
           </Typography>
-          
+          {error && (
+            <Typography color="error" align="center" sx={{ mb: 2 }}>{error}</Typography>
+          )}
+          {success && (
+            <Snackbar open={success} autoHideDuration={1600} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+              <Alert severity="success" sx={{ width: '100%' }}>
+                Inscription réussie ! Vous allez être redirigé vers la page de connexion.
+              </Alert>
+            </Snackbar>
+          )}
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
             <Box sx={{ display: 'flex', gap: 2 }}>
               <TextField
@@ -53,6 +133,7 @@ const RegisterPage = () => {
                 autoComplete="given-name"
                 value={formData.firstName}
                 onChange={handleChange}
+                error={!!fieldErrors.firstName}
               />
               <TextField
                 margin="normal"
@@ -64,6 +145,7 @@ const RegisterPage = () => {
                 autoComplete="family-name"
                 value={formData.lastName}
                 onChange={handleChange}
+                error={!!fieldErrors.lastName}
               />
             </Box>
             <TextField
@@ -71,21 +153,32 @@ const RegisterPage = () => {
               required
               fullWidth
               id="email"
-              label="Adresse email professionnelle"
+              label="Adresse email"
               name="email"
               autoComplete="email"
               value={formData.email}
               onChange={handleChange}
+              error={!!fieldErrors.email}
             />
             <TextField
               margin="normal"
               required
               fullWidth
-              id="companyName"
-              label="Nom de l'entreprise"
-              name="companyName"
-              autoComplete="organization"
-              value={formData.companyName}
+              id="phoneNumber"
+              label="Numéro de téléphone"
+              name="phoneNumber"
+              autoComplete="tel"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+              error={!!fieldErrors.phoneNumber}
+            />
+            <TextField
+              margin="normal"
+              fullWidth
+              id="comment"
+              label="Commentaire (optionnel)"
+              name="comment"
+              value={formData.comment}
               onChange={handleChange}
             />
             <TextField
@@ -99,6 +192,7 @@ const RegisterPage = () => {
               autoComplete="new-password"
               value={formData.password}
               onChange={handleChange}
+              error={!!fieldErrors.password}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -108,6 +202,32 @@ const RegisterPage = () => {
                       edge="end"
                     >
                       {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="confirmPassword"
+              label="Confirmer le mot de passe"
+              type={showConfirmPassword ? 'text' : 'password'}
+              id="confirmPassword"
+              autoComplete="new-password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              error={!!fieldErrors.confirmPassword}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle confirm password visibility"
+                      onClick={handleClickShowConfirmPassword}
+                      edge="end"
+                    >
+                      {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>
                 ),
@@ -131,9 +251,9 @@ const RegisterPage = () => {
               variant="contained"
               color="secondary"
               sx={{ mt: 3, mb: 2 }}
-              disabled={!formData.acceptTerms}
+              disabled={!formData.acceptTerms || loading}
             >
-              S'inscrire
+              {loading ? 'Inscription...' : "S'inscrire"}
             </Button>
             <Box sx={{ mt: 2, textAlign: 'center' }}>
               <Typography variant="body2">
