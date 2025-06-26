@@ -946,9 +946,6 @@ const ChatBox = ({
   // État pour suivre si le chat vient d'être initialisé
   const [isInitialRender, setIsInitialRender] = useState(true);
 
-  // Récupérer l'utilisateur connecté au niveau du composant
-  const { user } = useAuth();
-
   // Focus initial sur le TextField
   useEffect(() => {
     if (!isLoading && !initialPrompt) {
