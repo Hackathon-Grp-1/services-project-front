@@ -20,14 +20,17 @@ import DashboardPage from "./pages/DashboardPage";
 import EmailValidationPage from "./pages/EmailValidationPage";
 import HomePage from "./pages/HomePage";
 import HowItWorksPage from "./pages/HowItWorksPage";
+import LegalNoticePage from './pages/LegalNoticePage';
 import LoginPage from "./pages/LoginPage";
 import NeedFormPage from "./pages/NeedFormPage";
 import PathEditorPage from "./pages/PathEditorPage";
 import PricingPage from "./pages/PricingPage";
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import ProfilePage from "./pages/ProfilePage";
 import RegisterPage from "./pages/RegisterPage";
 import ServicePathsPage from "./pages/ServicePathsPage";
 import ServicesPage from "./pages/ServicesPage";
+import TermsOfServicePage from './pages/TermsOfServicePage';
 
 // Create MUI theme with our custom colors
 const theme = createTheme({
@@ -121,6 +124,9 @@ function App() {
                 element={<AutomatedServicesPage />}
               />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/legal-notice" element={<LegalNoticePage />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+              <Route path="/terms-of-service" element={<TermsOfServicePage />} />
             </Routes>
           </Layout>
         </AuthProvider>
