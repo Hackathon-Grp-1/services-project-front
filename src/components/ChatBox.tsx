@@ -676,6 +676,16 @@ const ChatBox = ({
     }
   }, [isLoading, initialPrompt]);
 
+  // Gestion automatique du focus quand le chargement se termine
+  useEffect(() => {
+    if (!isLoading && messages.length > 0) {
+      // Restaurer le focus après chaque fin de chargement
+      setTimeout(() => {
+        focusTextField();
+      }, 100);
+    }
+  }, [isLoading, messages.length]);
+
   useEffect(() => {
     console.log(
       "ChatBox monté, initialPrompt:",
@@ -784,7 +794,10 @@ const ChatBox = ({
         .finally(() => {
           setIsLoading(false);
           setNewMessage("");
-          focusTextField();
+          // Restaurer le focus avec un délai pour s'assurer que le DOM est mis à jour
+          setTimeout(() => {
+            focusTextField();
+          }, 150);
         });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -825,12 +838,16 @@ const ChatBox = ({
 
   // Fonction pour remettre le focus sur le TextField
   const focusTextField = () => {
+    // Augmenter le délai pour s'assurer que le DOM est mis à jour
     setTimeout(() => {
       if (textFieldRef.current) {
         console.log("Focus sur le TextField");
         textFieldRef.current.focus();
+        // S'assurer que le curseur est à la fin du texte
+        const length = textFieldRef.current.value.length;
+        textFieldRef.current.setSelectionRange(length, length);
       }
-    }, 50);
+    }, 100); // Augmenté de 50ms à 100ms
   };
 
   // Map pour tracker les messages déjà envoyés afin d'éviter les doublons
@@ -980,7 +997,10 @@ const ChatBox = ({
       console.log("Fin du traitement du message");
       setIsLoading(false);
       setNewMessage("");
-      focusTextField();
+      // Restaurer le focus avec un délai plus long pour s'assurer que le DOM est mis à jour
+      setTimeout(() => {
+        focusTextField();
+      }, 150);
     }
   };
 
@@ -994,10 +1014,10 @@ const ChatBox = ({
     if (onNewConversation) {
       onNewConversation();
     }
-    // Remettre le focus sur le TextField après une nouvelle conversation
+    // Remettre le focus sur le TextField après une nouvelle conversation avec un délai plus long
     setTimeout(() => {
       focusTextField();
-    }, 100);
+    }, 200);
   };
 
   return (
@@ -1337,42 +1357,65 @@ const ChatBox = ({
             maxWidth: "1200px",
             mx: "auto",
             width: "100%",
+            flexDirection: "column",
           }}
         >
-          <TextField
-            fullWidth
-            variant="outlined"
-            placeholder="Tapez votre message..."
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault(); // Empêche le comportement par défaut de la touche Entrée
-                handleSendMessage();
-              }
-            }}
-            disabled={isLoading}
-            size="medium"
-            inputRef={textFieldRef}
-            inputProps={{
-              autoComplete: "off",
-            }}
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <TextField
+              fullWidth
+              multiline
+              minRows={1}
+              maxRows={6}
+              variant="outlined"
+              placeholder="Tapez votre message..."
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  if (e.shiftKey) {
+                    // Maj+Enter : retour à la ligne (comportement par défaut)
+                    return;
+                  } else {
+                    // Enter seul : envoyer le message
+                    e.preventDefault();
+                    handleSendMessage();
+                  }
+                }
+              }}
+              disabled={isLoading}
+              size="medium"
+              inputRef={textFieldRef}
+              inputProps={{
+                autoComplete: "off",
+              }}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 3,
+                },
+              }}
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              endIcon={<SendIcon />}
+              onClick={handleSendMessage}
+              disabled={!newMessage.trim() || isLoading}
+              sx={{ borderRadius: 3, px: 3, py: 1 }}
+            >
+              Envoyer
+            </Button>
+          </Box>
+          <Typography
+            variant="caption"
+            color="text.secondary"
             sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 3,
-              },
+              fontSize: "0.75rem",
+              opacity: 0.7,
+              fontFamily: "monospace"
             }}
-          />
-          <Button
-            variant="contained"
-            color="primary"
-            endIcon={<SendIcon />}
-            onClick={handleSendMessage}
-            disabled={!newMessage.trim() || isLoading}
-            sx={{ borderRadius: 3, px: 3, py: 1 }}
           >
-            Envoyer
-          </Button>
+            Enter pour envoyer • Maj+Enter pour retour à la ligne
+          </Typography>
         </Box>
       </Box>
     </Box>
