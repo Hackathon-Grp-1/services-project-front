@@ -1,17 +1,18 @@
-import { useState, useRef } from 'react';
-import { Box, Button, Container, TextField, Typography, CircularProgress, Snackbar, Alert } from '@mui/material';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { fetchServicePaths } from '../api/mockApi';
-import { useServiceStore } from '../store/serviceStore';
-import ChatBox from '../components/ChatBox';
+import { SmartToy as SmartToyIcon } from '@mui/icons-material';
+import { Alert, Box, Button, CircularProgress, Container, Snackbar, TextField, Typography } from '@mui/material';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { startNewChat } from '../api/chatApi';
+import ChatBox from '../components/ChatBox';
 import { useAuth } from '../contexts/AuthContext';
+import { useServiceStore } from '../store/serviceStore';
 
 const NeedFormPage = () => {
   const [inputPrompt, setInputPrompt] = useState('');
   const [error, setError] = useState('');
   const [showChat, setShowChat] = useState(false);
+  const [isMac, setIsMac] = useState(false);
   const [loginSuccess, setLoginSuccess] = useState(() => {
     if (window.history.state && window.history.state.usr && window.history.state.usr.justLoggedIn) {
       return true;
@@ -22,15 +23,28 @@ const NeedFormPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const formRef = useRef<HTMLFormElement>(null);
-    
-  const { 
-    setPrompt, 
-    setServicePaths, 
-    isLoading, 
+
+  const {
+    setPrompt,
+    setServicePaths,
+    isLoading,
     setIsLoading
   } = useServiceStore();
 
   const { isLoggedIn } = useAuth();
+
+  // Détecter le système d'exploitation
+  useEffect(() => {
+    setIsMac(navigator.platform.toUpperCase().indexOf('MAC') >= 0);
+  }, []);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    const isCmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
+    if (isCmdOrCtrl && e.key === 'Enter') {
+      e.preventDefault();
+      handleSubmit(e as any);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,30 +53,30 @@ const NeedFormPage = () => {
       return;
     }
     console.log('Formulaire soumis avec prompt:', inputPrompt);
-    
+
     if (!inputPrompt.trim()) {
       setError('Veuillez décrire votre besoin');
       console.log('Erreur: prompt vide');
       return;
     }
-    
+
     setError('');
     setIsLoading(true);
     console.log('Chargement activé, initialisation du chat...');
-    
+
     try {
       // Démarrer une nouvelle session de chat
       const sessionId = startNewChat();
       console.log('Nouvelle session de chat créée, ID:', sessionId);
-      
+
       // Store the prompt in global state
       setPrompt(inputPrompt);
       console.log('Prompt stocké dans le state global');
-      
+
       // Afficher le chat
       setShowChat(true);
       console.log('showChat mis à true, le chat devrait s\'afficher');
-      
+
       // On n'utilise plus le mock API et la navigation directe vers service-paths
       // mais on garde le code commenté au cas où on en aurait besoin plus tard
       /*
@@ -97,11 +111,11 @@ const NeedFormPage = () => {
     setInputPrompt('');
     setError('');
   };
-  
+
   return (
-    <Box sx={{ 
-      py: showChat ? 0 : 8, 
-      minHeight: showChat ? 'auto' : '100vh', 
+    <Box sx={{
+      py: showChat ? 0 : 8,
+      minHeight: showChat ? 'auto' : '100vh',
       height: 'auto',
       bgcolor: 'background.default',
       display: 'block',
@@ -113,10 +127,10 @@ const NeedFormPage = () => {
           Connexion réussie !
         </Alert>
       </Snackbar>
-      <Container 
-        maxWidth={showChat ? false : "md"} 
-        disableGutters={showChat} 
-        sx={{ 
+      <Container
+        maxWidth={showChat ? false : "md"}
+        disableGutters={showChat}
+        sx={{
           display: 'block',
           height: 'auto',
           pb: showChat ? 0 : 'inherit' // Supprime le padding bottom quand le chat est affiché
@@ -131,9 +145,9 @@ const NeedFormPage = () => {
               transition={{ duration: 0.3 }}
             >
               <Box sx={{ mb: 6, textAlign: 'center' }}>
-                <Typography 
-                  variant="h2" 
-                  component="h1" 
+                <Typography
+                  variant="h2"
+                  component="h1"
                   sx={{ fontFamily: "'Inter', sans-serif", mb: 2 }}
                 >
                   Décrivez votre besoin
@@ -142,11 +156,12 @@ const NeedFormPage = () => {
                   Partagez les détails de votre projet pour que notre IA puisse vous proposer les meilleurs parcours de services.
                 </Typography>
               </Box>
-              
-              <Box 
-                component="form" 
+
+              <Box
+                component="form"
                 ref={formRef}
-                onSubmit={handleSubmit} 
+                onSubmit={handleSubmit}
+                onKeyDown={handleKeyDown}
                 sx={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -158,6 +173,7 @@ const NeedFormPage = () => {
                   rows={8}
                   value={inputPrompt}
                   onChange={(e) => setInputPrompt(e.target.value)}
+                  onKeyDown={handleKeyDown}
                   placeholder="Ex: Je souhaite créer un site e-commerce pour vendre mes produits artisanaux avec une boutique en ligne, un système de paiement sécurisé et une gestion des stocks..."
                   fullWidth
                   variant="outlined"
@@ -165,7 +181,7 @@ const NeedFormPage = () => {
                   helperText={error}
                   sx={{ mb: 4 }}
                 />
-                
+
                 <Button
                   type="submit"
                   variant="contained"
@@ -187,20 +203,34 @@ const NeedFormPage = () => {
                       Génération en cours...
                     </Box>
                   ) : (
-                    'Générer avec l\'IA'
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <SmartToyIcon sx={{ mr: 1 }} />
+                      Envoyer mon besoin à l&apos;IA
+                      <Box
+                        component="span"
+                        sx={{
+                          ml: 1,
+                          fontSize: '0.875rem',
+                          opacity: 0.8,
+                          fontFamily: 'monospace'
+                        }}
+                      >
+                        ({isMac ? '⌘' : 'Ctrl'}+↵)
+                      </Box>
+                    </Box>
                   )}
                 </Button>
               </Box>
             </motion.div>
           )}
-            {showChat && (
+          {showChat && (
             <motion.div
               key="chat"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              style={{ 
+              style={{
                 width: '100%',
                 height: 'calc(100vh - 70px)', // Hauteur réduite pour ne pas déborder sur le footer
                 display: 'block',
@@ -209,8 +239,8 @@ const NeedFormPage = () => {
             >
               {/* Rendu du ChatBox */}
               {(() => { console.log('Rendu du ChatBox avec initialPrompt:', inputPrompt); return null; })()}
-              <ChatBox 
-                initialPrompt={inputPrompt} 
+              <ChatBox
+                initialPrompt={inputPrompt}
                 onClose={handleCloseChat}
                 onNewConversation={handleNewConversation}
               />
