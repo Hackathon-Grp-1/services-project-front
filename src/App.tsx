@@ -72,6 +72,7 @@ const theme = createTheme({
 
 import Layout from './components/layout/Layout';
 import ScrollToTop from './utils/ScrollToTop';
+import UserProfileTest from './pages/UserProfileTest';
 
 function App() {  return (
     <ThemeProvider theme={theme}>
@@ -97,7 +98,8 @@ function App() {  return (
             <Route path="/contract" element={<ContractPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />          </Routes>
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/profile-test" element={<UserProfileTest />} />          </Routes>
           </Layout>
         </AuthProvider>
       </Router>

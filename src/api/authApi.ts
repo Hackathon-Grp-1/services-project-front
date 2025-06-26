@@ -9,14 +9,33 @@ export interface LoginCredentials {
   password: string;
 }
 
+export interface Role {
+  id: number;
+  createdAt: string;
+  updatedAt: string;
+  name: string;
+  type: string;
+  description: string;
+}
+
+export interface User {
+  id: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: null | string;
+  firstName: string;
+  lastName: string;
+  type: string;
+  email: string;
+  phoneNumber: string | null;
+  resetPasswordToken: string | null;
+  resetPasswordTokenExpires: string | null;
+  role: Role;
+}
+
 export interface AuthResponse {
-  token: string;
-  user: {
-    id: string;
-    email: string;
-    name?: string;
-    role?: string;
-  };
+  accessToken: string;
+  user: User;
 }
 
 // Login function
@@ -25,8 +44,8 @@ export const login = async (credentials: LoginCredentials): Promise<AuthResponse
     const response = await axios.post(`${API_BASE_URL}/auth/login`, credentials);
     
     // Store token in localStorage
-    if (response.data.token) {
-      localStorage.setItem('authToken', response.data.token);
+    if (response.data.accessToken) {
+      localStorage.setItem('authToken', response.data.accessToken);
       localStorage.setItem('user', JSON.stringify(response.data.user));
     }
     
