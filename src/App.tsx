@@ -77,6 +77,8 @@ const theme = createTheme({
 
 import Layout from "./components/layout/Layout";
 import ScrollToTop from "./utils/ScrollToTop";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordConfirmPage from "./pages/ResetPasswordConfirmPage";
 
 function App() {
   return (
@@ -121,6 +123,11 @@ function App() {
                 element={<AutomatedServicesPage />}
               />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route
+                path="/reset-password-confirm"
+                element={<ResetPasswordConfirmPage />}
+              />
             </Routes>
           </Layout>
         </AuthProvider>
