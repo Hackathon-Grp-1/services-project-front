@@ -232,7 +232,9 @@ const DesktopNav = ({
 
 const Navbar = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  // Solution 2 : Breakpoint custom avec navigation condensée
+  const isMobile = useMediaQuery('(max-width:1236px)');
+  const isCompact = useMediaQuery('(min-width:1237px) and (max-width:1300px)');
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -377,7 +379,7 @@ const Navbar = () => {
           <Logo isScrolled={scrolled} />
 
           {/* Mobile menu button */}
-          {isMobile && (
+          {(isMobile || isCompact) && (
             <IconButton
               color="inherit"
               aria-label="open drawer"
@@ -388,8 +390,8 @@ const Navbar = () => {
             </IconButton>
           )}
 
-          {/* Desktop navigation */}
-          {!isMobile && (
+          {/* Desktop navigation - seulement pour les très grands écrans */}
+          {!isMobile && !isCompact && (
             <Box sx={{ display: 'flex', alignItems: 'center' }}>              <DesktopNav 
                 navItems={navItems}
                 openMenu={openMenu}
@@ -406,6 +408,8 @@ const Navbar = () => {
                     borderColor: 'white', 
                     textTransform: 'none',
                     py: scrolled ? 0.5 : 0.75,
+                    px: scrolled ? 1 : 1.5,
+                    fontSize: scrolled ? '0.85rem' : '0.9rem',
                     transition: 'all 0.3s ease',
                   }}
                   component={RouterLink}
@@ -419,6 +423,8 @@ const Navbar = () => {
                   sx={{ 
                     textTransform: 'none',
                     py: scrolled ? 0.5 : 0.75,
+                    px: scrolled ? 1 : 1.5,
+                    fontSize: scrolled ? '0.85rem' : '0.9rem',
                     transition: 'all 0.3s ease',
                   }}
                   component={RouterLink}
@@ -435,13 +441,13 @@ const Navbar = () => {
       {/* Mobile drawer */}
       <Drawer
         variant="temporary"
-        open={isMobile && mobileOpen}
+        open={(isMobile || isCompact) && mobileOpen}
         onClose={handleDrawerToggle}
         ModalProps={{
           keepMounted: true, // Better mobile performance
         }}
         sx={{
-          display: { xs: 'block', md: 'none' },
+          display: { xs: 'block' },
           '& .MuiDrawer-paper': { 
             boxSizing: 'border-box', 
             width: 280,
