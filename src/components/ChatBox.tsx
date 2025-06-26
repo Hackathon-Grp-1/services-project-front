@@ -1360,47 +1360,49 @@ const ChatBox = ({
             flexDirection: "column",
           }}
         >
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <TextField
-              fullWidth
-              multiline
-              minRows={1}
-              maxRows={6}
-              variant="outlined"
-              placeholder="Tapez votre message..."
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  if (e.shiftKey) {
-                    // Maj+Enter : retour à la ligne (comportement par défaut)
-                    return;
-                  } else {
-                    // Enter seul : envoyer le message
-                    e.preventDefault();
-                    handleSendMessage();
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }}>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <TextField
+                fullWidth
+                multiline
+                minRows={1}
+                maxRows={6}
+                variant="outlined"
+                placeholder="Tapez votre message..."
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    if (e.shiftKey) {
+                      // Maj+Enter : retour à la ligne (comportement par défaut)
+                      return;
+                    } else {
+                      // Enter seul : envoyer le message
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
                   }
-                }
-              }}
-              disabled={isLoading}
-              size="medium"
-              inputRef={textFieldRef}
-              inputProps={{
-                autoComplete: "off",
-              }}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: 3,
-                },
-              }}
-            />
+                }}
+                disabled={isLoading}
+                size="medium"
+                inputRef={textFieldRef}
+                inputProps={{
+                  autoComplete: "off",
+                }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 3,
+                  },
+                }}
+              />
+            </Box>
             <Button
               variant="contained"
               color="primary"
               endIcon={<SendIcon />}
               onClick={handleSendMessage}
               disabled={!newMessage.trim() || isLoading}
-              sx={{ borderRadius: 3, px: 3, py: 1 }}
+              sx={{ borderRadius: 3, px: 3, py: 1, alignSelf: 'flex-end' }}
             >
               Envoyer
             </Button>
