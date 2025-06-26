@@ -1,22 +1,22 @@
-import React, { useState, useRef, useEffect, type ReactElement } from "react";
-import {
-  Box,
-  TextField,
-  Button,
-  Typography,
-  IconButton,
-  CircularProgress,
-  Card,
-  CardContent,
-  CardActions,
-} from "@mui/material";
-import SendIcon from "@mui/icons-material/Send";
 import CloseIcon from "@mui/icons-material/Close";
 import PersonIcon from "@mui/icons-material/Person";
-import { motion, AnimatePresence } from "framer-motion";
+import SendIcon from "@mui/icons-material/Send";
 import {
-  sendPrompt,
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  CircularProgress,
+  IconButton,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { AnimatePresence, motion } from "framer-motion";
+import React, { useEffect, useRef, useState, type ReactElement } from "react";
+import {
   sendCreateServicePrompt,
+  sendPrompt,
   startNewChat,
 } from "../api/chatApi";
 
@@ -348,9 +348,9 @@ const formatMessageContent = (content: string): ReactElement => {
                   dangerouslySetInnerHTML={{
                     __html: convertMarkdownToHtml(
                       q.trim() +
-                        (idx < questions.length - 1 || !q.trim().endsWith("?")
-                          ? " ?"
-                          : "")
+                      (idx < questions.length - 1 || !q.trim().endsWith("?")
+                        ? " ?"
+                        : "")
                     ),
                   }}
                   sx={markdownStyles}
@@ -1265,9 +1265,8 @@ const ChatBox = ({
 
                                 // Add a message to indicate selection
                                 const selectionMessage: ChatMessage = {
-                                  content: `Vous avez sélectionné le professionnel : ${
-                                    pro.description.split(",")[0]
-                                  }. Un représentant vous contactera prochainement.`,
+                                  content: `Vous avez sélectionné le professionnel : ${pro.description.split(",")[0]
+                                    }. Un représentant vous contactera prochainement.`,
                                   isUser: false,
                                   timestamp: new Date(),
                                 };
