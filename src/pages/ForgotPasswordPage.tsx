@@ -88,12 +88,12 @@ const ForgotPasswordPage: React.FC = () => {
             <span>
               {error}
             </span>
-            {error.includes('aucun compte') && (
+            {error.toLowerCase().includes('aucun compte') && (
               <Button
-                variant="outlined"
+                variant="text"
                 color="secondary"
                 href="/register"
-                sx={{ ml: 2, fontWeight: 600, borderRadius: 2, whiteSpace: 'nowrap' }}
+                sx={{ ml: 2, fontWeight: 600, textDecoration: 'underline', textTransform: 'none', fontSize: '0.85rem', p: 0, minWidth: 0 }}
                 size="small"
               >
                 S'inscrire
