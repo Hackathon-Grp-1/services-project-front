@@ -79,6 +79,7 @@ const theme = createTheme({
 });
 
 import Layout from "./components/layout/Layout";
+import CareersPage from "./pages/CareersPage";
 import ScrollToTop from "./utils/ScrollToTop";
 
 function App() {
@@ -127,6 +128,7 @@ function App() {
               <Route path="/legal-notice" element={<LegalNoticePage />} />
               <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
               <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+              <Route path="/careers" element={<CareersPage />} />
             </Routes>
           </Layout>
         </AuthProvider>
