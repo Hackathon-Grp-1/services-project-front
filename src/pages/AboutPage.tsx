@@ -29,7 +29,8 @@ const AnimatedCounter = ({
   suffix?: string;
 }) => {
   const [count, setCount] = useState(0);
-  const ref = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     let start = 0;
     const end = value;
@@ -39,14 +40,20 @@ const AnimatedCounter = ({
       start += increment;
       if (start < end) {
         setCount(Math.floor(start));
-        ref.current = setTimeout(update, 16);
+        timeoutRef.current = setTimeout(update, 16);
       } else {
         setCount(end);
       }
     }
+
     update();
 
-    if (ref.current) clearTimeout(ref.current);
+    // Cleanup function
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
   }, [value, duration]);
 
   return (
