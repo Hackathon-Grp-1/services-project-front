@@ -1,26 +1,27 @@
-import { useState, useEffect } from 'react';
-import { 
-  AppBar, 
-  Box, 
-  Toolbar, 
-  Typography, 
-  Button, 
-  IconButton, 
-  Drawer, 
-  List, 
-  ListItem, 
-  ListItemText, 
-  Container, 
-  useMediaQuery,
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import CloseIcon from '@mui/icons-material/Close';
+import MenuIcon from '@mui/icons-material/Menu';
+import {
+  AppBar,
+  Box,
+  Button,
+  Container,
+  Drawer,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
   Menu,
-  MenuItem
+  MenuItem,
+  Toolbar,
+  Typography,
+  useMediaQuery
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import MenuIcon from '@mui/icons-material/Menu';
-import CloseIcon from '@mui/icons-material/Close';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import { useEffect, useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { scrollToElement, isAnchorLink } from '../../utils/scrollHelper';
+import { useAuth } from '../../contexts/AuthContext';
+import { isAnchorLink, scrollToElement } from '../../utils/scrollHelper';
 
 interface NavItemType {
   label: string;
@@ -28,210 +29,9 @@ interface NavItemType {
   dropdown?: Array<{ label: string; path: string }>;
 }
 
-const navItems: NavItemType[] = [
-  { label: 'Accueil', path: '/' },
-  { 
-    label: 'Services', 
-    path: '#',
-    dropdown: [
-      { label: 'Consultation', path: '/services/consultation' },
-      { label: 'Développement', path: '/services/development' },
-      { label: 'Design', path: '/services/design' },
-      { label: 'Marketing', path: '/services/marketing' },
-    ]
-  },
-  { label: 'Comment ça marche', path: '/#how-it-works' },
-  { label: 'Tarifs', path: '/pricing' },
-  { label: 'À propos', path: '/about' },
-  { label: 'Contact', path: '/contact' },
-];
-
-// Logo component extracted from Navbar
-interface LogoProps {
-  isScrolled: boolean;
-}
-
-const Logo = ({ isScrolled }: LogoProps) => {
-  return (
-    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-      <Typography
-        variant="h6"
-        component={RouterLink}
-        to="/"
-        sx={{
-          fontFamily: "'Orbitron', sans-serif",
-          fontWeight: 600,
-          color: 'white',
-          textDecoration: 'none',
-          display: 'flex',
-          alignItems: 'center',
-          transition: 'all 0.3s ease',
-        }}
-      >
-        <Box 
-          component="span"
-          sx={{
-            background: 'linear-gradient(135deg, #7B61FF 0%, #5AC8FA 100%)',
-            color: 'white',
-            width: isScrolled ? 32 : 38,
-            height: isScrolled ? 32 : 38,
-            borderRadius: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            mr: isScrolled ? 1 : 1.5,
-            fontSize: isScrolled ? '1rem' : '1.2rem',
-            boxShadow: '0 4px 8px rgba(123, 97, 255, 0.3)',
-            border: '2px solid rgba(255, 255, 255, 0.2)',
-            transition: 'all 0.3s ease',
-          }}
-        >
-          S
-        </Box>
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-          <Typography 
-            variant="h6" 
-            component="span"
-            sx={{ 
-              lineHeight: 1.1,
-              fontWeight: 700,
-              letterSpacing: 1,
-              fontSize: { 
-                xs: isScrolled ? '1rem' : '1.2rem', 
-                md: isScrolled ? '1.1rem' : '1.3rem' 
-              },
-              transition: 'all 0.3s ease',
-            }}
-          >
-            Services
-          </Typography>
-          <Typography 
-            variant="caption" 
-            component="span"
-            sx={{ 
-              fontSize: isScrolled ? '0.6rem' : '0.65rem',
-              opacity: 0.85,
-              letterSpacing: 0.5,
-              fontFamily: "'Inter', sans-serif",
-              transition: 'all 0.3s ease',
-            }}
-          >
-          </Typography>
-        </Box>
-      </Typography>
-    </Box>
-  );
-};
-
-// DesktopNav component extracted from Navbar
-interface DesktopNavProps {
-  navItems: NavItemType[];
-  openMenu: string | null;
-  anchorEl: HTMLElement | null;
-  handleMenuOpen: (event: React.MouseEvent<HTMLElement>, menuName: string) => void;
-  handleMenuClose: () => void;
-  isScrolled: boolean;
-}
-
-const DesktopNav = ({ 
-  navItems, 
-  openMenu, 
-  anchorEl, 
-  handleMenuOpen, 
-  handleMenuClose,
-  isScrolled
-}: DesktopNavProps) => {
-  const navigate = useNavigate();
-  
-  const handleNavClick = (path: string, e: React.MouseEvent) => {
-    if (isAnchorLink(path)) {
-      e.preventDefault();
-      const id = path.replace('/#', '');
-      
-      // If we're already on home page, scroll directly
-      if (window.location.pathname === '/') {
-        scrollToElement(id);
-      } else {
-        // If we're on another page, navigate to home first then scroll
-        navigate('/');
-        setTimeout(() => scrollToElement(id), 300);
-      }
-    }
-  };
-
-  return (
-    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-      {navItems.map((item) => (
-        <Box key={item.label} sx={{ position: 'relative', mx: isScrolled ? 0.75 : 1, transition: 'all 0.3s ease' }}>
-          {item.dropdown ? (
-            <>
-              <Button
-                color="inherit"
-                onClick={(e) => handleMenuOpen(e, item.label)}
-                endIcon={<ArrowDropDownIcon />}
-                sx={{ 
-                  textTransform: 'none',
-                  fontWeight: 500,
-                  py: isScrolled ? 0.5 : 0.75,
-                  px: isScrolled ? 1 : 1.5,
-                  fontSize: isScrolled ? '0.9rem' : '1rem',
-                  transition: 'all 0.3s ease'
-                }}
-              >
-                {item.label}
-              </Button>
-              <Menu
-                anchorEl={anchorEl}
-                open={openMenu === item.label}
-                onClose={handleMenuClose}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'center',
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'center',
-                }}
-              >
-                {item.dropdown.map((dropdownItem) => (
-                  <MenuItem 
-                    key={dropdownItem.label}
-                    component={RouterLink}
-                    to={dropdownItem.path}
-                    onClick={handleMenuClose}
-                    sx={{ minWidth: 150 }}
-                  >
-                    {dropdownItem.label}
-                  </MenuItem>
-                ))}
-              </Menu>
-            </>
-          ) : (
-            <Button
-              color="inherit"
-              component={RouterLink}
-              to={item.path}
-              onClick={(e) => handleNavClick(item.path, e)}
-              sx={{ 
-                textTransform: 'none',
-                fontWeight: 500,
-                py: isScrolled ? 0.5 : 0.75,
-                px: isScrolled ? 1 : 1.5,
-                fontSize: isScrolled ? '0.9rem' : '1rem',
-                transition: 'all 0.3s ease'
-              }}
-            >
-              {item.label}
-            </Button>
-          )}
-        </Box>
-      ))}
-    </Box>
-  );
-};
-
 const Navbar = () => {
   const theme = useTheme();
+  const { user, isLoggedIn } = useAuth();
   // Solution 2 : Breakpoint custom avec navigation condensée
   const isMobile = useMediaQuery('(max-width:1236px)');
   const isCompact = useMediaQuery('(min-width:1237px) and (max-width:1300px)');
@@ -241,7 +41,37 @@ const Navbar = () => {
   // For dropdowns
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
-  
+
+  // Navigation items - change based on authentication
+  const getNavItems = (): NavItemType[] => {
+    const baseItems: NavItemType[] = [
+      { label: 'Accueil', path: '/' },
+      {
+        label: 'Services',
+        path: '#',
+        dropdown: [
+          { label: 'Consultation', path: '/services/consultation' },
+          { label: 'Développement', path: '/services/development' },
+          { label: 'Design', path: '/services/design' },
+          { label: 'Marketing', path: '/services/marketing' },
+        ]
+      },
+      { label: 'Comment ça marche', path: '/#how-it-works' },
+      { label: 'Tarifs', path: '/pricing' },
+      { label: 'À propos', path: '/about' },
+      { label: 'Contact', path: '/contact' },
+    ];
+
+    // Add dashboard link for authenticated users
+    if (isLoggedIn) {
+      baseItems.splice(1, 0, { label: 'Dashboard', path: '/dashboard' });
+    }
+
+    return baseItems;
+  };
+
+  const navItems = getNavItems();
+
   // Effect to detect scrolling
   useEffect(() => {
     const handleScroll = () => {
@@ -253,7 +83,7 @@ const Navbar = () => {
     };
 
     window.addEventListener('scroll', handleScroll);
-    
+
     // Cleanup
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -272,15 +102,17 @@ const Navbar = () => {
   const handleMenuClose = () => {
     setAnchorEl(null);
     setOpenMenu(null);
-  };  const navigate = useNavigate();
-  
+  };
+
+  const navigate = useNavigate();
+
   const handleMobileNavClick = (path: string, e: React.MouseEvent) => {
     if (isAnchorLink(path)) {
       e.preventDefault();
       handleDrawerToggle();
-      
+
       const id = path.replace('/#', '');
-      
+
       // If we're already on home page, scroll directly
       if (window.location.pathname === '/') {
         setTimeout(() => scrollToElement(id), 300);
@@ -291,10 +123,173 @@ const Navbar = () => {
       }
     }
   };
-  
+
+  // Logo component
+  const Logo = ({ isScrolled }: { isScrolled: boolean }) => {
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Typography
+          variant="h6"
+          component={RouterLink}
+          to="/"
+          sx={{
+            fontFamily: "'Orbitron', sans-serif",
+            fontWeight: 600,
+            color: 'white',
+            textDecoration: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            transition: 'all 0.3s ease',
+          }}
+        >
+          <Box
+            component="span"
+            sx={{
+              background: 'linear-gradient(135deg, #7B61FF 0%, #5AC8FA 100%)',
+              color: 'white',
+              width: isScrolled ? 32 : 38,
+              height: isScrolled ? 32 : 38,
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              mr: isScrolled ? 1 : 1.5,
+              fontSize: isScrolled ? '1rem' : '1.2rem',
+              boxShadow: '0 4px 8px rgba(123, 97, 255, 0.3)',
+              border: '2px solid rgba(255, 255, 255, 0.2)',
+              transition: 'all 0.3s ease',
+            }}
+          >
+            S
+          </Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+            <Typography
+              variant="h6"
+              component="span"
+              sx={{
+                lineHeight: 1.1,
+                fontWeight: 700,
+                letterSpacing: 1,
+                fontSize: {
+                  xs: isScrolled ? '1rem' : '1.2rem',
+                  md: isScrolled ? '1.1rem' : '1.3rem'
+                },
+                transition: 'all 0.3s ease',
+              }}
+            >
+              Services
+            </Typography>
+            <Typography
+              variant="caption"
+              component="span"
+              sx={{
+                fontSize: isScrolled ? '0.6rem' : '0.65rem',
+                opacity: 0.85,
+                letterSpacing: 0.5,
+                fontFamily: "'Inter', sans-serif",
+                transition: 'all 0.3s ease',
+              }}
+            >
+            </Typography>
+          </Box>
+        </Typography>
+      </Box>
+    );
+  };
+
+  // Desktop navigation component
+  const DesktopNav = () => {
+    const handleNavClick = (path: string, e: React.MouseEvent) => {
+      if (isAnchorLink(path)) {
+        e.preventDefault();
+        const id = path.replace('/#', '');
+
+        // If we're already on home page, scroll directly
+        if (window.location.pathname === '/') {
+          scrollToElement(id);
+        } else {
+          // If we're on another page, navigate to home first then scroll
+          navigate('/');
+          setTimeout(() => scrollToElement(id), 300);
+        }
+      }
+    };
+
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        {navItems.map((item) => (
+          <Box key={item.label} sx={{ position: 'relative', mx: scrolled ? 0.75 : 1, transition: 'all 0.3s ease' }}>
+            {item.dropdown ? (
+              <>
+                <Button
+                  color="inherit"
+                  onClick={(e) => handleMenuOpen(e, item.label)}
+                  endIcon={<ArrowDropDownIcon />}
+                  sx={{
+                    textTransform: 'none',
+                    fontWeight: 500,
+                    py: scrolled ? 0.5 : 0.75,
+                    px: scrolled ? 1 : 1.5,
+                    fontSize: scrolled ? '0.9rem' : '1rem',
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  {item.label}
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  open={openMenu === item.label}
+                  onClose={handleMenuClose}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'center',
+                  }}
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'center',
+                  }}
+                >
+                  {item.dropdown.map((dropdownItem) => (
+                    <MenuItem
+                      key={dropdownItem.label}
+                      component={RouterLink}
+                      to={dropdownItem.path}
+                      onClick={handleMenuClose}
+                      sx={{ minWidth: 150 }}
+                    >
+                      {dropdownItem.label}
+                    </MenuItem>
+                  ))}
+                </Menu>
+              </>
+            ) : (
+              <Button
+                color="inherit"
+                component={RouterLink}
+                to={item.path}
+                onClick={(e) => handleNavClick(item.path, e)}
+                sx={{
+                  textTransform: 'none',
+                  fontWeight: 500,
+                  py: scrolled ? 0.5 : 0.75,
+                  px: scrolled ? 1 : 1.5,
+                  fontSize: scrolled ? '0.9rem' : '1rem',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                {item.label}
+              </Button>
+            )}
+          </Box>
+        ))}
+      </Box>
+    );
+  };
+
   // Mobile drawer content
   const drawer = (
-    <Box sx={{ textAlign: 'center', p: 2 }}>      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+    <Box sx={{ textAlign: 'center', p: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Logo isScrolled={scrolled} />
         <IconButton color="inherit" onClick={handleDrawerToggle}>
           <CloseIcon />
@@ -302,13 +297,13 @@ const Navbar = () => {
       </Box>
       <List>
         {navItems.map((item) => (
-          <ListItem 
+          <ListItem
             key={item.label}
             component={RouterLink}
             to={item.dropdown ? '#' : item.path}
             onClick={(e) => item.dropdown ? null : handleMobileNavClick(item.path, e)}
           >
-            <ListItemText 
+            <ListItemText
               primary={item.label}
               sx={{ color: theme.palette.text.primary }}
             />
@@ -319,15 +314,15 @@ const Navbar = () => {
           .filter(item => item.dropdown)
           .flatMap(item => item.dropdown || [])
           .map(subItem => (
-            <ListItem 
+            <ListItem
               key={subItem.label}
               component={RouterLink}
               to={subItem.path}
               sx={{ pl: 4 }}
               onClick={handleDrawerToggle}
             >
-              <ListItemText 
-                primary={subItem.label} 
+              <ListItemText
+                primary={subItem.label}
                 sx={{ color: theme.palette.text.secondary }}
               />
             </ListItem>
@@ -335,29 +330,51 @@ const Navbar = () => {
         }
       </List>
       <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
-        <Button 
-          variant="outlined" 
-          fullWidth
-          component={RouterLink}
-          to="/login"
-        >
-          Se connecter
-        </Button>
-        <Button 
-          variant="contained" 
-          color="secondary" 
-          fullWidth
-          component={RouterLink}
-          to="/register"
-        >
-          S'inscrire
-        </Button>
+        {!isLoggedIn ? (
+          <>
+            <Button
+              variant="outlined"
+              fullWidth
+              component={RouterLink}
+              to="/login"
+            >
+              Se connecter
+            </Button>
+            <Button
+              variant="contained"
+              color="secondary"
+              fullWidth
+              component={RouterLink}
+              to="/register"
+            >
+              S'inscrire
+            </Button>
+          </>
+        ) : (
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="body2" sx={{ mb: 1 }}>
+              Connecté en tant que {user?.name || user?.email}
+            </Typography>
+            <Button
+              variant="outlined"
+              fullWidth
+              onClick={() => {
+                // TODO: Implement logout
+                console.log('Logout');
+              }}
+            >
+              Se déconnecter
+            </Button>
+          </Box>
+        )}
       </Box>
     </Box>
   );
-  return (    <AppBar 
-      position="fixed" 
-      sx={{ 
+
+  return (
+    <AppBar
+      position="fixed"
+      sx={{
         bgcolor: scrolled ? 'rgba(18, 18, 35, 0.85)' : 'primary.main',
         backdropFilter: scrolled ? 'blur(8px)' : 'none',
         transition: 'all 0.3s ease',
@@ -365,12 +382,13 @@ const Navbar = () => {
         zIndex: (theme) => theme.zIndex.drawer + 1,
       }}
     >
-      <Container maxWidth="xl">        <Toolbar 
-          sx={{ 
-            justifyContent: 'space-between', 
-            p: { 
-              xs: scrolled ? '0.5rem' : '1rem', 
-              sm: scrolled ? '0.75rem 2rem' : '1rem 2rem' 
+      <Container maxWidth="xl">
+        <Toolbar
+          sx={{
+            justifyContent: 'space-between',
+            p: {
+              xs: scrolled ? '0.5rem' : '1rem',
+              sm: scrolled ? '0.75rem 2rem' : '1rem 2rem'
             },
             minHeight: scrolled ? { xs: '56px', md: '64px' } : { xs: '64px', md: '72px' },
             transition: 'all 0.3s ease',
@@ -392,46 +410,75 @@ const Navbar = () => {
 
           {/* Desktop navigation - seulement pour les très grands écrans */}
           {!isMobile && !isCompact && (
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>              <DesktopNav 
-                navItems={navItems}
-                openMenu={openMenu}
-                anchorEl={anchorEl}
-                handleMenuOpen={handleMenuOpen}
-                handleMenuClose={handleMenuClose}
-                isScrolled={scrolled}
-              />
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <DesktopNav />
               <Box sx={{ ml: 2, display: 'flex', gap: 1 }}>
-                <Button 
-                  variant="outlined" 
-                  color="inherit" 
-                  sx={{ 
-                    borderColor: 'white', 
-                    textTransform: 'none',
-                    py: scrolled ? 0.5 : 0.75,
-                    px: scrolled ? 1 : 1.5,
-                    fontSize: scrolled ? '0.85rem' : '0.9rem',
-                    transition: 'all 0.3s ease',
-                  }}
-                  component={RouterLink}
-                  to="/login"
-                >
-                  Se connecter
-                </Button>
-                <Button 
-                  variant="contained" 
-                  color="secondary"
-                  sx={{ 
-                    textTransform: 'none',
-                    py: scrolled ? 0.5 : 0.75,
-                    px: scrolled ? 1 : 1.5,
-                    fontSize: scrolled ? '0.85rem' : '0.9rem',
-                    transition: 'all 0.3s ease',
-                  }}
-                  component={RouterLink}
-                  to="/register"
-                >
-                  S'inscrire
-                </Button>
+                {!isLoggedIn ? (
+                  <>
+                    <Button
+                      variant="outlined"
+                      color="inherit"
+                      sx={{
+                        borderColor: 'white',
+                        textTransform: 'none',
+                        py: scrolled ? 0.5 : 0.75,
+                        px: scrolled ? 1 : 1.5,
+                        fontSize: scrolled ? '0.85rem' : '0.9rem',
+                        transition: 'all 0.3s ease',
+                      }}
+                      component={RouterLink}
+                      to="/login"
+                    >
+                      Se connecter
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      sx={{
+                        textTransform: 'none',
+                        py: scrolled ? 0.5 : 0.75,
+                        px: scrolled ? 1 : 1.5,
+                        fontSize: scrolled ? '0.85rem' : '0.9rem',
+                        transition: 'all 0.3s ease',
+                      }}
+                      component={RouterLink}
+                      to="/register"
+                    >
+                      S'inscrire
+                    </Button>
+                  </>
+                ) : (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'white',
+                        fontSize: scrolled ? '0.8rem' : '0.85rem',
+                        transition: 'all 0.3s ease',
+                      }}
+                    >
+                      {user?.name || user?.email}
+                    </Typography>
+                    <Button
+                      variant="outlined"
+                      color="inherit"
+                      sx={{
+                        borderColor: 'white',
+                        textTransform: 'none',
+                        py: scrolled ? 0.5 : 0.75,
+                        px: scrolled ? 1 : 1.5,
+                        fontSize: scrolled ? '0.85rem' : '0.9rem',
+                        transition: 'all 0.3s ease',
+                      }}
+                      onClick={() => {
+                        // TODO: Implement logout
+                        console.log('Logout');
+                      }}
+                    >
+                      Déconnexion
+                    </Button>
+                  </Box>
+                )}
               </Box>
             </Box>
           )}
@@ -448,8 +495,8 @@ const Navbar = () => {
         }}
         sx={{
           display: { xs: 'block' },
-          '& .MuiDrawer-paper': { 
-            boxSizing: 'border-box', 
+          '& .MuiDrawer-paper': {
+            boxSizing: 'border-box',
             width: 280,
             backgroundColor: 'background.paper',
           },
