@@ -56,6 +56,53 @@ const mockServices: AutomatedService[] = [
     },
     createdAt: new Date('2024-01-15'),
     updatedAt: new Date('2024-01-15')
+  },
+  {
+    id: '2',
+    name: 'Love Message Bot',
+    description: 'Ce bot reformule vos textes pour les rendre bienveillants et positifs.',
+    category: 'Remaniement',
+    provider: {
+      id: 'user1',
+      name: 'Audrey HOSSEPIAN',
+      avatar: 'https://via.placeholder.com/40'
+    },
+    pricing: {
+      type: 'per_request',
+      amount: 0.10,
+      currency: 'EUR'
+    },
+    configuration: {
+      endpoint: 'https://n8n.labodolivier.com/webhook/lovemsg',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      bodyTemplate: JSON.stringify({
+        prompt: '{{input.text}}'
+      }, null, 2),
+      responseMapping: {
+        'remaniement': '$.remaniement',
+        'original': '$.original',
+      }
+    },
+    usage: {
+      totalRequests: 42,
+      averageRating: 4.9,
+      isActive: true
+    },
+    metadata: {
+      tags: ['remaniement', 'bienveillance', 'positif', 'IA'],
+      examples: [
+        {
+          input: { text: 'Tu es nul, tu n\'as rien compris.' },
+          output: { remaniement: 'Je pense que tu pourrais essayer une autre approche, tu vas y arriver !', original: 'Tu es nul, tu n\'as rien compris.' },
+          description: 'Remaniement d\'un message négatif en message bienveillant.'
+        }
+      ]
+    },
+    createdAt: new Date('2024-02-01'),
+    updatedAt: new Date('2024-02-01')
   }
 ];
 
