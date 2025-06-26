@@ -47,10 +47,10 @@ const Navbar = () => {
 
   // Navigation items - change based on authentication
   const getNavItems = (): NavItemType[] => {
-    const baseItems: NavItemType[] = [
+    let baseItems: NavItemType[] = [
       { label: 'Accueil', path: '/' },
       {
-        label: 'Services',
+        label: 'Trouver un service',
         path: '#',
         dropdown: [
           { label: 'Consultation', path: '/services/consultation' },
@@ -65,9 +65,11 @@ const Navbar = () => {
       { label: 'Contact', path: '/contact' },
     ];
 
-    // Add dashboard link for authenticated users
     if (isLoggedIn) {
-      baseItems.splice(1, 0, { label: 'Dashboard', path: '/dashboard' });
+      // Supprimer Accueil si connecté
+      baseItems = baseItems.filter(item => item.label !== 'Accueil');
+      // Supprimer les onglets non pertinents pour les utilisateurs connectés
+      baseItems = baseItems.filter(item => !['Comment ça marche', 'Tarifs', 'À propos', 'Contact'].includes(item.label));
     }
 
     return baseItems;
@@ -399,7 +401,8 @@ const Navbar = () => {
           Vous avez été déconnecté.
         </Alert>
       </Snackbar>
-      <Container maxWidth="xl">        <Toolbar 
+      <Container maxWidth="xl">
+        <Toolbar 
           sx={{ 
             justifyContent: 'space-between', 
             p: { 
@@ -424,15 +427,30 @@ const Navbar = () => {
           )}
           {/* Desktop navigation */}
           {!isMobile && (
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>              
-            <DesktopNav 
-                navItems={navItems}
-                openMenu={openMenu}
-                anchorEl={anchorEl}
-                handleMenuOpen={handleMenuOpen}
-                handleMenuClose={handleMenuClose}
-                isScrolled={scrolled}
-              />
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              {/* Bouton spécial "Mes services" */}
+              {isLoggedIn && (
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  size="large"
+                  component={RouterLink}
+                  to="/dashboard"
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: '1.05rem',
+                    borderRadius: 2,
+                    px: 3,
+                    py: 1.2,
+                    mr: 2,
+                    boxShadow: '0 2px 8px rgba(123, 97, 255, 0.15)',
+                    textTransform: 'none',
+                  }}
+                >
+                  Mes services
+                </Button>
+              )}
+              <DesktopNav />
               <Box sx={{ ml: 2, display: 'flex', gap: 1 }}>
                 {isLoggedIn ? (
                   <>
