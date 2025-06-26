@@ -13,6 +13,7 @@ import RegisterPage from './pages/RegisterPage';
 import PathEditorPage from './pages/PathEditorPage';
 import ContractPage from './pages/ContractPage';
 import DashboardPage from './pages/DashboardPage';
+import CreateServicePage from './pages/CreateServicePage';
 import { AuthProvider } from './contexts/AuthContext';
 import './index.css';
 import '@fontsource/inter/400.css';
@@ -71,11 +72,13 @@ const theme = createTheme({
 });
 
 import Layout from './components/layout/Layout';
+import ScrollToTop from './utils/ScrollToTop';
 
 function App() {  return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
+        <ScrollToTop />
         <AuthProvider>
           <Layout>
             <Routes>
@@ -95,7 +98,9 @@ function App() {  return (
             <Route path="/contract" element={<ContractPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />          </Routes>
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/create-service" element={<CreateServicePage />} />
+            </Routes>
           </Layout>
         </AuthProvider>
       </Router>

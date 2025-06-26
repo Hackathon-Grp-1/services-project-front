@@ -14,7 +14,7 @@ import SendIcon from '@mui/icons-material/Send';
 import CloseIcon from '@mui/icons-material/Close';
 import PersonIcon from '@mui/icons-material/Person';
 import { motion, AnimatePresence } from 'framer-motion';
-import { sendPrompt, startNewChat, type ChatResponse } from '../api/chatApi';
+import { sendPrompt, sendCreateServicePrompt, startNewChat, type ChatResponse } from '../api/chatApi';
 
 interface ChatMessage {
   content: string;
@@ -23,6 +23,8 @@ interface ChatMessage {
   professionals?: Array<{
     id: number;
     description: string;
+    tarif?: string;
+    skills?: string[];
   }>;
 }
 
@@ -30,11 +32,17 @@ interface ChatBoxProps {
   initialPrompt?: string;
   onClose: () => void;
   onNewConversation?: () => void;
+  chatType?: 'search' | 'create_service';
 }
 
 // Component for displaying professional cards
 const ProfessionalCard = ({ professional, onClick }: { 
-  professional: { id: number; description: string }; 
+  professional: { 
+    id: number; 
+    description: string;
+    tarif?: string;
+    skills?: string[];
+  }; 
   onClick?: (id: number) => void 
 }) => {
   // Extract name from description (typically the first part before the comma)
@@ -61,29 +69,83 @@ const ProfessionalCard = ({ professional, onClick }: {
       onClick={() => onClick && onClick(professional.id)}
     >
       <CardContent>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-          <PersonIcon color="primary" sx={{ mr: 1 }} />
-          <Typography 
-          variant="h6" 
-          component="div"
-          sx={{ 
-            fontFamily: 'Inter, sans-serif', 
-            lineHeight: 1.5,
-          }}>
-            {name}
-          </Typography>
+        {/* Header with name and rate */}
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between',
+          mb: 1 
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <PersonIcon color="primary" sx={{ mr: 1 }} />
+            <Typography 
+              variant="h6" 
+              component="div"
+              sx={{ 
+                fontFamily: 'Inter, sans-serif', 
+                lineHeight: 1.5,
+              }}>
+              {name}
+            </Typography>
+          </Box>
+          {professional.tarif && (
+            <Box 
+              sx={{ 
+                bgcolor: 'primary.light',
+                color: 'white',
+                px: 1.5,
+                py: 0.5,
+                borderRadius: 10,
+                fontSize: '0.75rem',
+                fontWeight: 'bold',
+                fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              {professional.tarif}
+            </Box>
+          )}
         </Box>
+
+        {/* Description */}
         <Typography 
           variant="body2" 
           color="text.secondary"
           sx={{ 
             fontFamily: 'Inter, sans-serif', 
             lineHeight: 1.5,
-            fontSize: '0.875rem'
+            fontSize: '0.875rem',
+            mb: professional.skills && professional.skills.length > 0 ? 2 : 0
           }}
         >
           {details}
         </Typography>
+        
+        {/* Skills chips */}
+        {professional.skills && professional.skills.length > 0 && (
+          <Box sx={{ 
+            display: 'flex', 
+            flexWrap: 'wrap', 
+            gap: 0.75,
+            mt: 1 
+          }}>
+            {professional.skills.map((skill, idx) => (
+              <Box 
+                key={idx}
+                sx={{
+                  bgcolor: 'secondary.light',
+                  color: 'white',
+                  px: 1,
+                  py: 0.25,
+                  borderRadius: 1,
+                  fontSize: '0.7rem',
+                  fontFamily: 'Inter, sans-serif',
+                }}
+              >
+                {skill}
+              </Box>
+            ))}
+          </Box>
+        )}
       </CardContent>
       <CardActions>
         <Button size="small" color="primary">
@@ -95,6 +157,121 @@ const ProfessionalCard = ({ professional, onClick }: {
       </CardActions>
     </Card>
   );
+};
+
+// Utility function to convert markdown to HTML
+const convertMarkdownToHtml = (text: string): string => {
+  if (!text) return text;
+  
+  let result = text;
+  
+  // Convert # title to <h1>title</h1>
+  result = result.replace(/^#\s+(.+)$/gm, '<h1>$1</h1>');
+  
+  // Convert ## title to <h2>title</h2>
+  result = result.replace(/^##\s+(.+)$/gm, '<h2>$1</h2>');
+  
+  // Convert ### title to <h3>title</h3>
+  result = result.replace(/^###\s+(.+)$/gm, '<h3>$1</h3>');
+  
+  // Convert #### title to <h4>title</h4>
+  result = result.replace(/^####\s+(.+)$/gm, '<h4>$1</h4>');
+  
+  // Convert ###### title to <h5>title</h5>
+  result = result.replace(/^#####\s+(.+)$/gm, '<h5>$1</h5>');
+  
+  // Convert ###### title to <h6>title</h6>
+  result = result.replace(/^######\s+(.+)$/gm, '<h6>$1</h6>');
+  
+  // Convert **bold** to <strong>bold</strong>
+  result = result.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  
+  // Convert *italic* to <em>italic</em> (but not if it's already inside **)
+  result = result.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<em>$1</em>');
+  
+  // Convert `code` to <code>code</code>
+  result = result.replace(/`([^`]+)`/g, '<code>$1</code>');
+  
+  // Convert ~~strikethrough~~ to <del>strikethrough</del>
+  result = result.replace(/~~(.*?)~~/g, '<del>$1</del>');
+  
+  // Convert [link text](url) to <a href="url">link text</a>
+  result = result.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  
+  return result;
+};
+
+// Styles for markdown elements
+const markdownStyles = {
+  '& h1': {
+    fontSize: '1.75rem',
+    fontWeight: 'bold',
+    marginTop: '1rem',
+    marginBottom: '0.5rem',
+    color: 'primary.main',
+    borderBottom: '2px solid',
+    borderColor: 'divider',
+    paddingBottom: '0.25rem',
+  },
+  '& h2': {
+    fontSize: '1.5rem',
+    fontWeight: 'bold',
+    marginTop: '0.875rem',
+    marginBottom: '0.375rem',
+    color: 'primary.main',
+  },
+  '& h3': {
+    fontSize: '1.25rem',
+    fontWeight: 'bold',
+    marginTop: '0.75rem',
+    marginBottom: '0.25rem',
+    color: 'text.primary',
+  },
+  '& h4': {
+    fontSize: '1.125rem',
+    fontWeight: 'bold',
+    marginTop: '0.625rem',
+    marginBottom: '0.25rem',
+    color: 'text.primary',
+  },
+  '& h5': {
+    fontSize: '1rem',
+    fontWeight: 'bold',
+    marginTop: '0.5rem',
+    marginBottom: '0.25rem',
+    color: 'text.primary',
+  },
+  '& h6': {
+    fontSize: '0.875rem',
+    fontWeight: 'bold',
+    marginTop: '0.5rem',
+    marginBottom: '0.25rem',
+    color: 'text.secondary',
+  },
+  '& strong': {
+    fontWeight: 'bold',
+  },
+  '& em': {
+    fontStyle: 'italic',
+  },
+  '& code': {
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    padding: '2px 4px',
+    borderRadius: '4px',
+    fontFamily: 'monospace',
+    fontSize: '0.875em',
+  },
+  '& del': {
+    textDecoration: 'line-through',
+    opacity: 0.7,
+  },
+  '& a': {
+    color: 'primary.main',
+    textDecoration: 'none',
+    '&:hover': {
+      textDecoration: 'underline',
+    },
+  },
 };
 
 // Utility function to format message content with proper bullet points
@@ -130,15 +307,16 @@ const formatMessageContent = (content: string): ReactElement => {
         return (
           <>
             {introText && (
-              <Typography paragraph margin="dense">
-                {introText}
-              </Typography>
+              <Typography paragraph margin="dense" dangerouslySetInnerHTML={{ __html: convertMarkdownToHtml(introText) }} sx={markdownStyles} />
             )}
             <ul style={{ paddingLeft: '20px', marginTop: '8px', marginBottom: '8px' }}>
               {questions.map((q, idx) => (
-                <li key={`q-${idx}`}>
-                  {q.trim()}{idx < questions.length - 1 || !q.trim().endsWith('?') ? ' ?' : ''}
-                </li>
+                <Box 
+                  key={`q-${idx}`} 
+                  component="li"
+                  dangerouslySetInnerHTML={{ __html: convertMarkdownToHtml(q.trim() + (idx < questions.length - 1 || !q.trim().endsWith('?') ? ' ?' : '')) }} 
+                  sx={markdownStyles} 
+                />
               ))}
             </ul>
           </>
@@ -202,6 +380,37 @@ const formatMessageContent = (content: string): ReactElement => {
       return; // Skip to next line
     }
     
+    // Check for markdown headers
+    const headerPattern = /^(#{1,6})\s+(.+)$/;
+    const headerMatch = line.trim().match(headerPattern);
+    if (headerMatch) {
+      // If we were previously in a list, add it to the formatted content
+      if (inBulletList || inNumberedList) {
+        if (inBulletList) {
+          formattedLines.push(
+            <ul key={`ul-${index}`} style={{ paddingLeft: '20px', marginTop: '8px', marginBottom: '8px' }}>
+              {currentList}
+            </ul>
+          );
+        } else {
+          formattedLines.push(
+            <ol key={`ol-${index}`} style={{ paddingLeft: '20px', marginTop: '8px', marginBottom: '8px' }}>
+              {currentList}
+            </ol>
+          );
+        }
+        inBulletList = false;
+        inNumberedList = false;
+        currentList = [];
+      }
+      
+      // Add the header with markdown formatting
+      formattedLines.push(
+        <Typography key={`header-${index}`} dangerouslySetInnerHTML={{ __html: convertMarkdownToHtml(line) }} sx={markdownStyles} />
+      );
+      return; // Skip to next line
+    }
+    
     // Check for bullet point
     if (bulletPattern.test(line.trim())) {
       if (!inBulletList || inNumberedList) {
@@ -219,8 +428,14 @@ const formatMessageContent = (content: string): ReactElement => {
         if (currentList.length === 0) currentList = [];
       }
       
+      const bulletContent = line.trim().substring(2);
       currentList.push(
-        <li key={`bullet-${index}`}>{line.trim().substring(2)}</li>
+        <Box 
+          key={`bullet-${index}`} 
+          component="li"
+          dangerouslySetInnerHTML={{ __html: convertMarkdownToHtml(bulletContent) }} 
+          sx={markdownStyles}
+        />
       );
     } 
     // Check for numbered list
@@ -246,7 +461,13 @@ const formatMessageContent = (content: string): ReactElement => {
       const content = line.substring(dotIndex + 1).trim();
       
       currentList.push(
-        <li key={`number-${index}`} value={number}>{content}</li>
+        <Box 
+          key={`number-${index}`} 
+          component="li"
+          value={number} 
+          dangerouslySetInnerHTML={{ __html: convertMarkdownToHtml(content) }} 
+          sx={markdownStyles}
+        />
       );
     } 
     // Regular text
@@ -274,9 +495,7 @@ const formatMessageContent = (content: string): ReactElement => {
       // Add the current line if it's not empty
       if (line.trim()) {
         formattedLines.push(
-          <Typography key={`text-${index}`} paragraph margin="dense">
-            {line}
-          </Typography>
+          <Typography key={`text-${index}`} paragraph margin="dense" dangerouslySetInnerHTML={{ __html: convertMarkdownToHtml(line) }} sx={markdownStyles} />
         );
       } else if (index > 0 && index < lines.length - 1) {
         // Add empty lines as breaks between paragraphs, but not at the beginning or end
@@ -303,17 +522,33 @@ const formatMessageContent = (content: string): ReactElement => {
   return <>{formattedLines}</>;
 };
 
-const ChatBox = ({ initialPrompt, onClose, onNewConversation }: ChatBoxProps) => {
+const ChatBox = ({ initialPrompt, onClose, onNewConversation, chatType = 'search' }: ChatBoxProps) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState(initialPrompt || '');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<null | HTMLDivElement>(null);  // Référence pour suivre si le message initial a déjà été envoyé
   const initialPromptSent = useRef(false);
-  const [activeProfessionals, setActiveProfessionals] = useState<Array<{id: number, description: string}>>([]);
+  const textFieldRef = useRef<HTMLInputElement>(null); // Référence pour le TextField
+  const [activeProfessionals, setActiveProfessionals] = useState<Array<{
+    id: number; 
+    description: string; 
+    tarif?: string;
+    skills?: string[];
+  }>>([]);
   const [selectedProfessionalId, setSelectedProfessionalId] = useState<number | null>(null);
 
+  // État pour suivre si le chat vient d'être initialisé
+  const [isInitialRender, setIsInitialRender] = useState(true);
+
+  // Focus initial sur le TextField
   useEffect(() => {
-    console.log('ChatBox monté, initialPrompt:', initialPrompt);
+    if (!isLoading && !initialPrompt) {
+      focusTextField();
+    }
+  }, [isLoading, initialPrompt]);
+
+  useEffect(() => {
+    console.log('ChatBox monté, initialPrompt:', initialPrompt, 'chatType:', chatType);
     
     // Vérifie si l'initialPrompt existe et n'a pas déjà été envoyé
     if (initialPrompt && !initialPromptSent.current) {
@@ -330,7 +565,10 @@ const ChatBox = ({ initialPrompt, onClose, onNewConversation }: ChatBoxProps) =>
       setMessages([initialMessage]);
       setIsLoading(true);
       
-      sendPrompt(initialPrompt)
+      // Utiliser la fonction appropriée selon le type de chat
+      const sendFunction = chatType === 'create_service' ? sendCreateServicePrompt : sendPrompt;
+      
+      sendFunction(initialPrompt)
         .then(response => {
           console.log('Réponse reçue pour le message initial:', response);
           
@@ -384,13 +622,24 @@ const ChatBox = ({ initialPrompt, onClose, onNewConversation }: ChatBoxProps) =>
         .finally(() => {
           setIsLoading(false);
           setNewMessage('');
+          focusTextField();
         });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    // Assurer que le scroll vers le bas se produit après le rendu
+    // Si c'est le premier rendu ou que le nombre de messages est <= 2 et que c'est l'init
+    if (isInitialRender && messages.length <= 2) {
+      console.log('Premier rendu du chat - pas de scroll');
+      if (messages.length === 2) {
+        // Une fois que le premier message et sa réponse sont chargés, ce n'est plus le rendu initial
+        setIsInitialRender(false);
+      }
+      return;
+    }
+    
+    // Pour les messages suivants, faire défiler vers le bas
     const timeoutId = setTimeout(() => {
       scrollToBottom();
     }, 100);
@@ -399,7 +648,7 @@ const ChatBox = ({ initialPrompt, onClose, onNewConversation }: ChatBoxProps) =>
     
     // Nettoyage du timeout lors du démontage
     return () => clearTimeout(timeoutId);
-  }, [messages]);
+  }, [messages, isInitialRender]);
 
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
@@ -411,11 +660,22 @@ const ChatBox = ({ initialPrompt, onClose, onNewConversation }: ChatBoxProps) =>
       });
     }
   };
+
+  // Fonction pour remettre le focus sur le TextField
+  const focusTextField = () => {
+    setTimeout(() => {
+      if (textFieldRef.current) {
+        console.log('Focus sur le TextField');
+        textFieldRef.current.focus();
+      }
+    }, 50);
+  };
+
   // Map pour tracker les messages déjà envoyés afin d'éviter les doublons
   const sentMessages = useRef(new Set<string>());
   
   const handleSendMessage = async () => {
-    console.log('handleSendMessage appelé avec message:', newMessage);
+    console.log('handleSendMessage appelé avec message:', newMessage, 'chatType:', chatType);
     
     if (!newMessage.trim() || isLoading) {
       console.log('Message vide ou chargement en cours, abandon');
@@ -452,8 +712,10 @@ const ChatBox = ({ initialPrompt, onClose, onNewConversation }: ChatBoxProps) =>
     console.log('isLoading mis à true');
     
     try {
-      console.log('Envoi du prompt au webhook:', newMessage);
-      const response = await sendPrompt(newMessage);
+      // Utiliser la fonction appropriée selon le type de chat
+      const sendFunction = chatType === 'create_service' ? sendCreateServicePrompt : sendPrompt;
+      console.log('Envoi du prompt au webhook avec type:', chatType, 'message:', newMessage);
+      const response = await sendFunction(newMessage);
       console.log('Réponse reçue du webhook:', response);
       
       // Nouvelle structure de traitement pour le format n8n
@@ -515,6 +777,7 @@ const ChatBox = ({ initialPrompt, onClose, onNewConversation }: ChatBoxProps) =>
       console.log('Fin du traitement du message');
       setIsLoading(false);
       setNewMessage('');
+      focusTextField();
     }
   };
 
@@ -528,6 +791,10 @@ const ChatBox = ({ initialPrompt, onClose, onNewConversation }: ChatBoxProps) =>
     if (onNewConversation) {
       onNewConversation();
     }
+    // Remettre le focus sur le TextField après une nouvelle conversation
+    setTimeout(() => {
+      focusTextField();
+    }, 100);
   };
 
   return (
@@ -549,26 +816,33 @@ const ChatBox = ({ initialPrompt, onClose, onNewConversation }: ChatBoxProps) =>
     >
       <Box sx={{ 
         display: 'flex',
-        justifyContent: 'flex-end',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         p: 2
       }}>
-        <Button
-          variant="outlined"
-          color="primary"
-          startIcon={<SendIcon />}
-          onClick={handleNewConversation}
-          sx={{ mr: 2 }}
-        >
-          Nouvelle conversation
-        </Button>
-        <IconButton 
-          color="primary"
-          onClick={onClose}
-          title="Fermer"
-          sx={{ border: '1px solid', borderColor: 'divider' }}
-        >
-          <CloseIcon />
-        </IconButton>
+        <Box sx={{ flex: 1 }} />
+        <Typography variant="h6" sx={{ flex: 1, textAlign: 'center' }}>
+          {chatType === 'create_service' ? 'Création de service avec l\'IA' : 'Discussion avec l\'IA'}
+        </Typography>
+        <Box sx={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>  
+          <Button
+            variant="outlined"
+            color="primary"
+            startIcon={<SendIcon />}
+            onClick={handleNewConversation}
+            sx={{ mr: 2 }}
+          >
+            Nouvelle conversation
+          </Button>
+          <IconButton 
+            color="primary"
+            onClick={onClose}
+            title="Fermer"
+            sx={{ border: '1px solid', borderColor: 'divider' }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </Box>
       </Box>
 
       <Box sx={{ 
@@ -840,6 +1114,10 @@ const ChatBox = ({ initialPrompt, onClose, onNewConversation }: ChatBoxProps) =>
             }}
             disabled={isLoading}
             size="medium"
+            inputRef={textFieldRef}
+            inputProps={{
+              autoComplete: 'off'
+            }}
             sx={{
               '& .MuiOutlinedInput-root': {
                 borderRadius: 3,

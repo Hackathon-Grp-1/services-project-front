@@ -10,6 +10,13 @@ export interface ChatRequest {
   id_session: string;
 }
 
+// Type pour la requête de création de service
+export interface CreateServiceRequest {
+  request: "CHAT_CREATE_SERVICE";
+  prompt: string;
+  id_session: string;
+}
+
 // Type pour la réponse
 export interface ChatResponse {
   // Format d'ancien système
@@ -28,6 +35,8 @@ export interface ChatResponse {
   professionals?: Array<{
     id: number;
     description: string;
+    tarif?: string;
+    skills?: string[];
     [key: string]: any;
   }>;
   request?: {
@@ -115,6 +124,49 @@ export const sendPrompt = async (prompt: string): Promise<ChatResponse> => {
   }
 };
 
+// Nouvelle fonction pour créer un service via le chat IA
+export const sendCreateServicePrompt = async (prompt: string): Promise<ChatResponse> => {
+  try {
+    const sessionId = ChatSession.getInstance().getSessionId();
+    
+    const requestData: CreateServiceRequest = {
+      request: "CHAT_CREATE_SERVICE",
+      prompt,
+      id_session: sessionId
+    };
+    
+    console.log('Envoi de la requête de création de service au webhook:', {
+      url: API_URL,
+      sessionId,
+      prompt: prompt.substring(0, 50) + (prompt.length > 50 ? '...' : '')
+    });
+    
+    const startTime = Date.now();
+    const response = await axios.post(API_URL, requestData);
+    const endTime = Date.now();
+    
+    console.log(`Réponse reçue du webhook pour création de service (${endTime - startTime}ms):`, {
+      status: response.status,
+      headers: response.headers,
+      data: response.data
+    });
+    
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error('Erreur Axios lors de la création de service:', {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data
+      });
+    } else {
+      console.error('Erreur inconnue lors de la création de service:', error);
+    }
+    throw error;
+  }
+};
+
 // Fonction pour démarrer une nouvelle session de chat
 // Variable pour tracer les appels multiples
 let callCounter = 0;
@@ -141,6 +193,7 @@ export const getCurrentSessionId = (): string => {
 
 export default {
   sendPrompt,
+  sendCreateServicePrompt,
   startNewChat,
   getCurrentSessionId
 };
