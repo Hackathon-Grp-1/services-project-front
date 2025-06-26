@@ -44,9 +44,6 @@ const LoginPage = () => {
     }
     if (!password) {
       errors.password = true;
-    } else if (password.length < 8) {
-      errors.password = true;
-      setLocalError("Le mot de passe doit contenir au moins 8 caractères.");
     }
     if (Object.keys(errors).length > 0) {
       if (!localError)
