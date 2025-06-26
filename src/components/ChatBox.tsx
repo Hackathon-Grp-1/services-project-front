@@ -1352,6 +1352,8 @@ const ChatBox = ({
         </Box>
       </Box>
 
+      {/* Footer */}
+
       <Box
         sx={{
           p: 1.5,
