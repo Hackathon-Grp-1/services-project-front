@@ -1,6 +1,6 @@
 import { Box, Button, Container, Typography } from "@mui/material";
-import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from '../contexts/AuthContext';
 
 const HeroSection = () => {
@@ -16,23 +16,23 @@ const HeroSection = () => {
   };
 
   const handleProposeService = () => {
-    navigate("/create-service");
+    navigate("/dashboard/create-service");
   };
 
   return (
     <Box
       component={motion.div}
       initial={{ background: "#1E2A38" }}
-      animate={{ 
+      animate={{
         background: [
-          "#1E2A38", 
+          "#1E2A38",
           "#232F3E",
-          "#283545", 
+          "#283545",
           "#1E2A38"
         ]
       }}
-      transition={{ 
-        duration: 10, 
+      transition={{
+        duration: 10,
         repeat: Infinity,
         repeatType: "reverse"
       }}
@@ -47,14 +47,14 @@ const HeroSection = () => {
       {/* Background design elements */}
       <Box
         component={motion.div}
-        animate={{ 
+        animate={{
           x: [0, 10, -5, 0],
           y: [0, -15, 5, 0],
           scale: [1, 1.05, 0.98, 1],
           opacity: [0.7, 0.8, 0.7]
         }}
-        transition={{ 
-          duration: 20, 
+        transition={{
+          duration: 20,
           ease: "easeInOut",
           repeat: Infinity,
           repeatType: "reverse"
@@ -72,16 +72,16 @@ const HeroSection = () => {
       />
       <Box
         component={motion.div}
-        animate={{ 
+        animate={{
           x: [0, -10, 15, 0],
           y: [0, 10, -5, 0],
           scale: [1, 0.95, 1.02, 1],
           opacity: [0.7, 0.9, 0.7]
         }}
-        transition={{ 
-          duration: 15, 
+        transition={{
+          duration: 15,
           ease: "easeInOut",
-          repeat: Infinity, 
+          repeat: Infinity,
           repeatType: "reverse"
         }}
         sx={{
@@ -95,17 +95,17 @@ const HeroSection = () => {
           zIndex: 0,
         }}
       />
-      
+
       {/* Additional floating bubbles */}
       <Box
         component={motion.div}
-        animate={{ 
+        animate={{
           x: [0, 20, -10, 0],
           y: [0, -20, 10, 0],
           scale: [1, 1.1, 0.9, 1],
         }}
-        transition={{ 
-          duration: 18, 
+        transition={{
+          duration: 18,
           ease: "easeInOut",
           repeat: Infinity,
           repeatType: "reverse"
@@ -121,16 +121,16 @@ const HeroSection = () => {
           zIndex: 0,
         }}
       />
-      
+
       <Box
         component={motion.div}
-        animate={{ 
+        animate={{
           x: [0, -15, 5, 0],
           y: [0, 5, -15, 0],
           scale: [1, 0.9, 1.05, 1],
         }}
-        transition={{ 
-          duration: 25, 
+        transition={{
+          duration: 25,
           ease: "easeInOut",
           repeat: Infinity,
           repeatType: "reverse"

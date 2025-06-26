@@ -116,7 +116,7 @@ const Navbar = () => {
         <Typography
           variant="h6"
           component={RouterLink}
-          to={isLoggedIn ? "/need-form" : "/"}
+          to={isLoggedIn ? "/" : "/"}
           sx={{
             fontFamily: "'Orbitron', sans-serif",
             fontWeight: 600,

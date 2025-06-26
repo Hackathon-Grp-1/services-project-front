@@ -103,8 +103,8 @@ function App() {
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
-              <Route path="/create-service" element={<CreateServicePage />} />
-              <Route path="/create-automated-service" element={<CreateAutomatedServicePage />} />
+              <Route path="/dashboard/create-service" element={<CreateServicePage />} />
+              <Route path="/dashboard/create-automated-service" element={<CreateAutomatedServicePage />} />
               <Route path="/automated-services" element={<AutomatedServicesPage />} />
               <Route path="/profile" element={<ProfilePage />} />
             </Routes>
