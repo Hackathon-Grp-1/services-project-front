@@ -126,7 +126,7 @@ const DashboardPage = () => {
 
   // Navigation vers les nouvelles pages
   const handleNavigateToCreateService = () => {
-    navigate('/create-service');
+    navigate('/dashboard/create-service');
   };
 
   const handleNavigateToCreateAutomatedService = () => {
@@ -354,26 +354,54 @@ const DashboardPage = () => {
         {/* Bouton flottant pour ajouter un service */}
         <SpeedDial
           ariaLabel="Actions rapides"
+          color="secondary"
           sx={{
             position: 'fixed',
             bottom: 24,
             right: 24,
+            '& .MuiSpeedDial-fab': {
+              backgroundColor: 'secondary.main',
+              '&:hover': {
+                backgroundColor: 'secondary.dark'
+              }
+            }
           }}
           icon={<SpeedDialIcon />}
         >
           <SpeedDialAction
             icon={<AddIcon />}
-            tooltipTitle="Créer un service"
+            slotProps={{
+              tooltip: {
+                title: "Créer un service",
+                sx: {
+                  color: 'grey'
+                }
+              }
+            }}
             onClick={handleNavigateToCreateService}
           />
           <SpeedDialAction
             icon={<SmartToyIcon />}
-            tooltipTitle="Créer un service automatisé"
+            slotProps={{
+              tooltip: {
+                title: "Créer un service automatisé",
+                sx: {
+                  color: 'grey'
+                }
+              }
+            }}
             onClick={handleNavigateToCreateAutomatedService}
           />
           <SpeedDialAction
             icon={<SpeedIcon />}
-            tooltipTitle="Voir les services automatisés"
+            slotProps={{
+              tooltip: {
+                title: "Voir les services automatisés",
+                sx: {
+                  color: 'grey'
+                }
+              }
+            }}
             onClick={handleNavigateToAutomatedServices}
           />
         </SpeedDial>
