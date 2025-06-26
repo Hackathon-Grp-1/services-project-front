@@ -459,9 +459,9 @@ const Navbar = () => {
                       color="inherit"
                       sx={{ borderColor: 'white', textTransform: 'none', py: scrolled ? 0.5 : 0.75, transition: 'all 0.3s ease' }}
                       component={RouterLink}
-                      to="/dashboard"
+                      to="/profile"
                     >
-                      Mon espace
+                      Mon profil
                     </Button>
                     <Button
                       variant="contained"

@@ -14,6 +14,7 @@ import PathEditorPage from './pages/PathEditorPage';
 import ContractPage from './pages/ContractPage';
 import DashboardPage from './pages/DashboardPage';
 import CreateServicePage from './pages/CreateServicePage';
+import ProfilePage from './pages/ProfilePage';
 import { AuthProvider } from './contexts/AuthContext';
 import './index.css';
 import '@fontsource/inter/400.css';
@@ -100,6 +101,7 @@ function App() {  return (
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/create-service" element={<CreateServicePage />} />
+            <Route path="/profile" element={<ProfilePage />} />
             </Routes>
           </Layout>
         </AuthProvider>
