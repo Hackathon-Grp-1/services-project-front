@@ -1,26 +1,41 @@
-import { useState } from 'react';
-import { Box, Typography, TextField, Button, Container, Paper, InputAdornment, IconButton, Checkbox, FormControlLabel, Snackbar, Alert } from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { register } from '../api/authApi';
+import { useState } from "react";
+import {
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Container,
+  Paper,
+  InputAdornment,
+  IconButton,
+  Checkbox,
+  FormControlLabel,
+  Snackbar,
+  Alert,
+} from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { register } from "../api/authApi";
 
 const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phoneNumber: '',
-    password: '',
-    confirmPassword: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    password: "",
+    confirmPassword: "",
     acceptTerms: false,
-    role: '', // Ajout du champ rôle
+    role: "", // Ajout du champ rôle
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: boolean }>({});
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: boolean }>(
+    {}
+  );
   const navigate = useNavigate();
 
   const handleClickShowPassword = () => {
@@ -30,11 +45,16 @@ const RegisterPage = () => {
     setShowConfirmPassword(!showConfirmPassword);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, checked } = e.target;
-    setFormData(prev => ({
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
+    setFormData((prev) => ({
       ...prev,
-      [name]: name === 'acceptTerms' ? checked : value
+      [name]: name === "acceptTerms" ? checked : value,
     }));
   };
 
@@ -52,7 +72,7 @@ const RegisterPage = () => {
     if (!formData.confirmPassword) errors.confirmPassword = true;
     if (!formData.role) errors.role = true; // Validation du rôle
     if (Object.keys(errors).length > 0) {
-      setError('Merci de remplir tous les champs obligatoires.');
+      setError("Merci de remplir tous les champs obligatoires.");
       setFieldErrors(errors);
       return;
     }
@@ -64,19 +84,19 @@ const RegisterPage = () => {
     }
     // Phone format (simple check)
     if (!/^\+?\d{8,}$/.test(formData.phoneNumber)) {
-      setError('Le numéro de téléphone est invalide.');
+      setError("Le numéro de téléphone est invalide.");
       setFieldErrors({ phoneNumber: true });
       return;
     }
     // Password match
     if (formData.password !== formData.confirmPassword) {
-      setError('Les mots de passe ne correspondent pas.');
+      setError("Les mots de passe ne correspondent pas.");
       setFieldErrors({ password: true, confirmPassword: true });
       return;
     }
     // Password strength (exemple simple)
     if (formData.password.length < 8) {
-      setError('Le mot de passe doit contenir au moins 8 caractères.');
+      setError("Le mot de passe doit contenir au moins 8 caractères.");
       setFieldErrors({ password: true });
       return;
     }
@@ -86,20 +106,20 @@ const RegisterPage = () => {
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
-        phoneNumber: formData.phoneNumber || undefined, // optionnel
+        phoneNumber: formData.phoneNumber || "", // optionnel
         password: formData.password,
         confirmPassword: formData.confirmPassword,
         role: formData.role,
       });
       setSuccess(true);
       setTimeout(() => {
-        navigate('/login', { state: { registered: true } });
+        navigate("/login", { state: { registered: true } });
       }, 1800);
     } catch (err: any) {
       // Gestion des erreurs API
       let apiMsg = err?.response?.data?.message;
-      if (Array.isArray(apiMsg)) apiMsg = apiMsg.join(' ');
-      setError(apiMsg || 'Erreur lors de l’inscription. Veuillez réessayer.');
+      if (Array.isArray(apiMsg)) apiMsg = apiMsg.join(" ");
+      setError(apiMsg || "Erreur lors de l’inscription. Veuillez réessayer.");
     } finally {
       setLoading(false);
     }
@@ -109,21 +129,34 @@ const RegisterPage = () => {
     <Box sx={{ py: 8 }}>
       <Container maxWidth="sm">
         <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
-          <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ mb: 4 }}>
+          <Typography
+            variant="h4"
+            component="h1"
+            gutterBottom
+            align="center"
+            sx={{ mb: 4 }}
+          >
             Créez votre compte
           </Typography>
           {error && (
-            <Typography color="error" align="center" sx={{ mb: 2 }}>{error}</Typography>
+            <Typography color="error" align="center" sx={{ mb: 2 }}>
+              {error}
+            </Typography>
           )}
           {success && (
-            <Snackbar open={success} autoHideDuration={1600} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-              <Alert severity="success" sx={{ width: '100%' }}>
-                Inscription réussie ! Vous allez être redirigé vers la page de connexion.
+            <Snackbar
+              open={success}
+              autoHideDuration={1600}
+              anchorOrigin={{ vertical: "top", horizontal: "center" }}
+            >
+              <Alert severity="success" sx={{ width: "100%" }}>
+                Inscription réussie ! Vous allez être redirigé vers la page de
+                connexion.
               </Alert>
             </Snackbar>
           )}
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box sx={{ display: "flex", gap: 2 }}>
               <TextField
                 margin="normal"
                 required
@@ -179,7 +212,7 @@ const RegisterPage = () => {
               fullWidth
               name="password"
               label="Mot de passe"
-              type={showPassword ? 'text' : 'password'}
+              type={showPassword ? "text" : "password"}
               id="password"
               autoComplete="new-password"
               value={formData.password}
@@ -205,7 +238,7 @@ const RegisterPage = () => {
               fullWidth
               name="confirmPassword"
               label="Confirmer le mot de passe"
-              type={showConfirmPassword ? 'text' : 'password'}
+              type={showConfirmPassword ? "text" : "password"}
               id="confirmPassword"
               autoComplete="new-password"
               value={formData.confirmPassword}
@@ -239,7 +272,9 @@ const RegisterPage = () => {
               SelectProps={{ native: true }}
               sx={{ mt: 2 }}
             >
-              <option value="" disabled>Choisissez votre profil *</option>
+              <option value="" disabled>
+                Choisissez votre profil *
+              </option>
               <option value="ENTREPRENEUR">Entrepreneur</option>
               <option value="CUSTOMER">Client</option>
             </TextField>
@@ -263,16 +298,16 @@ const RegisterPage = () => {
               sx={{ mt: 3, mb: 2 }}
               disabled={!formData.acceptTerms || loading}
             >
-              {loading ? 'Inscription...' : "S'inscrire"}
+              {loading ? "Inscription..." : "S'inscrire"}
             </Button>
-            <Box sx={{ mt: 2, textAlign: 'center' }}>
+            <Box sx={{ mt: 2, textAlign: "center" }}>
               <Typography variant="body2">
-                Vous avez déjà un compte ?{' '}
+                Vous avez déjà un compte ?{" "}
                 <Button
                   component={RouterLink}
                   to="/login"
                   color="secondary"
-                  sx={{ textTransform: 'none' }}
+                  sx={{ textTransform: "none" }}
                 >
                   Se connecter
                 </Button>

@@ -1,7 +1,8 @@
 // API functions for authentication
-import axios from 'axios';
+import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3007/api/v1';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:3007/api/v1";
 
 // Define types
 export interface LoginCredentials {
@@ -50,72 +51,85 @@ export interface RegisterCredentials {
 }
 
 // Login function
-export const login = async (credentials: LoginCredentials): Promise<AuthResponse> => {
+export const login = async (
+  credentials: LoginCredentials
+): Promise<AuthResponse> => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/auth/login`, credentials);
+    const response = await axios.post(
+      `${API_BASE_URL}/auth/login`,
+      credentials
+    );
 
     // Store token in localStorage
     if (response.data.accessToken) {
-      localStorage.setItem('authToken', response.data.accessToken);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-      localStorage.setItem('tokenExpiry', new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString()); // 4 hours
+      localStorage.setItem("authToken", response.data.accessToken);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      localStorage.setItem(
+        "tokenExpiry",
+        new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString()
+      ); // 4 hours
     }
 
     return response.data;
   } catch (error) {
-    console.error('Login error:', error);
+    console.error("Login error:", error);
     throw error;
   }
 };
 
 // Register function
-export const register = async (credentials: RegisterCredentials): Promise<any> => {
+export const register = async (
+  credentials: RegisterCredentials
+): Promise<any> => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/auth/register`, credentials);
+    const response = await axios.post(
+      `${API_BASE_URL}/auth/register`,
+      credentials
+    );
     return response.data;
   } catch (error) {
-    console.error('Register error:', error);
+    console.error("Register error:", error);
     throw error;
   }
 };
 
 // Logout function
 export const logout = (): void => {
-  localStorage.removeItem('authToken');
-  localStorage.removeItem('user');
-  localStorage.removeItem('tokenExpiry');
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("user");
+  localStorage.removeItem("tokenExpiry");
 };
 
 // Check if user is authenticated
 export const isAuthenticated = (): boolean => {
-  const token = localStorage.getItem('authToken');
-  const expiry = localStorage.getItem('tokenExpiry');
-  
+  const token = localStorage.getItem("authToken");
+  const expiry = localStorage.getItem("tokenExpiry");
+
   if (!token || !expiry) {
     return false;
   }
-  
+
   // Check if token has expired
   const expiryDate = new Date(expiry);
   const now = new Date();
-  
+
   if (now > expiryDate) {
     // Token expired, clear storage
     logout();
     return false;
   }
-  
+
   return true;
 };
 
 // Get current user
-export const getCurrentUser = (): User | null => {
-  const userStr = localStorage.getItem('user');
+export const getCurrentUser = (): any => {
+  const userStr = localStorage.getItem("user");
   if (userStr) {
     try {
       return JSON.parse(userStr);
     } catch (error) {
-      console.error('Error parsing user from localStorage:', error);
+      console.error("Error parsing user from localStorage:", error);
       logout();
       return null;
     }
@@ -128,11 +142,25 @@ export const getAuthToken = (): string | null => {
   if (!isAuthenticated()) {
     return null;
   }
-  return localStorage.getItem('authToken');
+  return localStorage.getItem("authToken");
 };
 
 // Add auth header to requests
 export const authHeader = (): Record<string, string> => {
   const token = getAuthToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+// Validate account with token
+export const validateAccount = async (token: string): Promise<any> => {
+  try {
+    const response = await axios.post(
+      `${API_BASE_URL}/users/validate-account`,
+      { token }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Account validation error:", error);
+    throw error;
+  }
 };

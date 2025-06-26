@@ -1,44 +1,45 @@
-import '@fontsource/inter/400.css';
-import '@fontsource/inter/500.css';
-import '@fontsource/inter/600.css';
-import '@fontsource/inter/700.css';
-import '@fontsource/orbitron/400.css';
-import '@fontsource/orbitron/500.css';
-import '@fontsource/orbitron/600.css';
-import '@fontsource/orbitron/700.css';
-import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
-import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
-import './index.css';
-import AboutPage from './pages/AboutPage';
-import AutomatedServicesPage from './pages/AutomatedServicesPage';
-import ContactPage from './pages/ContactPage';
-import ContractPage from './pages/ContractPage';
-import CreateAutomatedServicePage from './pages/CreateAutomatedServicePage';
-import CreateServicePage from './pages/CreateServicePage';
-import DashboardPage from './pages/DashboardPage';
-import HomePage from './pages/HomePage';
-import HowItWorksPage from './pages/HowItWorksPage';
-import LoginPage from './pages/LoginPage';
-import NeedFormPage from './pages/NeedFormPage';
-import PathEditorPage from './pages/PathEditorPage';
-import PricingPage from './pages/PricingPage';
-import ProfilePage from './pages/ProfilePage';
-import RegisterPage from './pages/RegisterPage';
-import ServicePathsPage from './pages/ServicePathsPage';
-import ServicesPage from './pages/ServicesPage';
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/500.css";
+import "@fontsource/inter/600.css";
+import "@fontsource/inter/700.css";
+import "@fontsource/orbitron/400.css";
+import "@fontsource/orbitron/500.css";
+import "@fontsource/orbitron/600.css";
+import "@fontsource/orbitron/700.css";
+import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import "./index.css";
+import AboutPage from "./pages/AboutPage";
+import AutomatedServicesPage from "./pages/AutomatedServicesPage";
+import ContactPage from "./pages/ContactPage";
+import ContractPage from "./pages/ContractPage";
+import CreateAutomatedServicePage from "./pages/CreateAutomatedServicePage";
+import CreateServicePage from "./pages/CreateServicePage";
+import DashboardPage from "./pages/DashboardPage";
+import EmailValidationPage from "./pages/EmailValidationPage";
+import HomePage from "./pages/HomePage";
+import HowItWorksPage from "./pages/HowItWorksPage";
+import LoginPage from "./pages/LoginPage";
+import NeedFormPage from "./pages/NeedFormPage";
+import PathEditorPage from "./pages/PathEditorPage";
+import PricingPage from "./pages/PricingPage";
+import ProfilePage from "./pages/ProfilePage";
+import RegisterPage from "./pages/RegisterPage";
+import ServicePathsPage from "./pages/ServicePathsPage";
+import ServicesPage from "./pages/ServicesPage";
 
 // Create MUI theme with our custom colors
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1E2A38',
+      main: "#1E2A38",
     },
     secondary: {
-      main: '#7B61FF',
+      main: "#7B61FF",
     },
     background: {
-      default: '#F7F9FC',
+      default: "#F7F9FC",
     },
   },
   typography: {
@@ -67,15 +68,15 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           fontFamily: "'Inter', sans-serif",
-          textTransform: 'none',
+          textTransform: "none",
         },
       },
     },
   },
 });
 
-import Layout from './components/layout/Layout';
-import ScrollToTop from './utils/ScrollToTop';
+import Layout from "./components/layout/Layout";
+import ScrollToTop from "./utils/ScrollToTop";
 
 function App() {
   return (
@@ -103,16 +104,29 @@ function App() {
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
-              <Route path="/dashboard/create-service" element={<CreateServicePage />} />
-              <Route path="/dashboard/create-automated-service" element={<CreateAutomatedServicePage />} />
-              <Route path="/automated-services" element={<AutomatedServicesPage />} />
+              <Route
+                path="/email-validation"
+                element={<EmailValidationPage />}
+              />
+              <Route
+                path="/dashboard/create-service"
+                element={<CreateServicePage />}
+              />
+              <Route
+                path="/dashboard/create-automated-service"
+                element={<CreateAutomatedServicePage />}
+              />
+              <Route
+                path="/automated-services"
+                element={<AutomatedServicesPage />}
+              />
               <Route path="/profile" element={<ProfilePage />} />
             </Routes>
           </Layout>
         </AuthProvider>
       </Router>
     </ThemeProvider>
-  )
+  );
 }
 
-export default App
+export default App;

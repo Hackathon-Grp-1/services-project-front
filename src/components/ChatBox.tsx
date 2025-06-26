@@ -1,23 +1,28 @@
-import React, { useState, useRef, useEffect, type ReactElement } from 'react';
-import { 
-  Box, 
-  TextField, 
-  Button, 
-  Typography, 
-  IconButton, 
-  CircularProgress, 
-  Card, 
-  CardContent, 
-  CardActions 
-} from '@mui/material';
-import SendIcon from '@mui/icons-material/Send';
-import CloseIcon from '@mui/icons-material/Close';
-import PersonIcon from '@mui/icons-material/Person';
-import { motion, AnimatePresence } from 'framer-motion';
-import { sendPrompt, sendCreateServicePrompt, startNewChat, type ChatResponse } from '../api/chatApi';
-import axios from 'axios';
-import { useAuth } from '../contexts/AuthContext';
-import { getAuthToken, authHeader } from '../api/authApi';
+import React, { useState, useRef, useEffect, type ReactElement } from "react";
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  IconButton,
+  CircularProgress,
+  Card,
+  CardContent,
+  CardActions,
+} from "@mui/material";
+import SendIcon from "@mui/icons-material/Send";
+import CloseIcon from "@mui/icons-material/Close";
+import PersonIcon from "@mui/icons-material/Person";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  sendPrompt,
+  sendCreateServicePrompt,
+  startNewChat,
+  type ChatResponse,
+} from "../api/chatApi";
+import axios from "axios";
+import { useAuth } from "../contexts/AuthContext";
+import { getAuthToken, authHeader } from "../api/authApi";
 
 interface ChatMessage {
   content: string;
@@ -38,7 +43,8 @@ interface ChatBoxProps {
   chatType?: "search" | "create_service";
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3007/api/v1';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:3007/api/v1";
 
 // Component for displaying professional cards
 const ProfessionalCard = ({
@@ -349,9 +355,9 @@ const formatMessageContent = (content: string): ReactElement => {
                   dangerouslySetInnerHTML={{
                     __html: convertMarkdownToHtml(
                       q.trim() +
-                      (idx < questions.length - 1 || !q.trim().endsWith("?")
-                        ? " ?"
-                        : "")
+                        (idx < questions.length - 1 || !q.trim().endsWith("?")
+                          ? " ?"
+                          : "")
                     ),
                   }}
                   sx={markdownStyles}
@@ -367,8 +373,10 @@ const formatMessageContent = (content: string): ReactElement => {
 
   // Check if content has bullet points first (priority over questions)
   const lines = content.split("\n");
-  const hasBulletPoints = lines.some(line => /^-\s+.+/.test(line.trim()));
-  const hasNumberedLists = lines.some(line => /^\d+\.\s+.+/.test(line.trim()));
+  const hasBulletPoints = lines.some((line) => /^-\s+.+/.test(line.trim()));
+  const hasNumberedLists = lines.some((line) =>
+    /^\d+\.\s+.+/.test(line.trim())
+  );
 
   // If there are bullet points or numbered lists, process them normally instead of using question detection
   if (hasBulletPoints || hasNumberedLists) {
@@ -1055,40 +1063,56 @@ const ChatBox = ({
             timestamp: new Date(),
             professionals: professionals,
           };
-          
-          console.log('Ajout de la réponse initiale du bot:', botMessage);
-          setMessages(prev => [...prev, botMessage]);
-          
+
+          console.log("Ajout de la réponse initiale du bot:", botMessage);
+          setMessages((prev) => [...prev, botMessage]);
+
           // Si ready est à true et que le chat est de type create_service, on enregistre en base de données le service
-          if (response.ready === true && chatType === 'create_service') {
-            console.log('Enregistrement du service en base de données');
+          if (response.ready === true && chatType === "create_service") {
+            console.log("Enregistrement du service en base de données");
             // TODO: appel l'api au controller service POST pour enregistrer le service en base de données
 
-            axios.post(`${API_BASE_URL}/services`, {
-              serviceType: "human",
-              user: user?.id,
-              firstName: response.service.firstName || "",
-              lastName: response.service.lastName || "", 
-              aiAgentName: response.service.name || "Service IA",
-              organization: response.service.organization || 0, 
-              phone: response.service.phone || "", 
-              hourlyRate: response.service.hourlyRate || 0, 
-              professionalDescription: response.service.professionalDescription || "",
-              skillsDescription: response.service.skillsDescription || "",
-              skills: response.service.skills || [],
-              domain: response.service.domain || "general",
-              shortProfessionalDescription: response.service.shortProfessionalDescription || response.service.description || "",
-              shortSkillsDescription: response.service.shortSkillsDescription || response.service.skillsDescription || "",
-              aiModel: response.service.aiModel || "gpt-4",
-              aiVersion: response.service.aiVersion || "1.0"
-            }, {
-              headers: {
-                ...authHeader(),
-                'Content-Type': 'application/json'
-              }
-            }).catch(error => {
-              console.error('Erreur lors de l\'enregistrement du service:', error);
-            });
+            axios
+              .post(
+                `${API_BASE_URL}/services`,
+                {
+                  serviceType: "human",
+                  user: user?.id,
+                  firstName: response.service.firstName || "",
+                  lastName: response.service.lastName || "",
+                  aiAgentName: response.service.name || "Service IA",
+                  organization: response.service.organization || 0,
+                  phone: response.service.phone || "",
+                  hourlyRate: response.service.hourlyRate || 0,
+                  professionalDescription:
+                    response.service.professionalDescription || "",
+                  skillsDescription: response.service.skillsDescription || "",
+                  skills: response.service.skills || [],
+                  domain: response.service.domain || "general",
+                  shortProfessionalDescription:
+                    response.service.shortProfessionalDescription ||
+                    response.service.description ||
+                    "",
+                  shortSkillsDescription:
+                    response.service.shortSkillsDescription ||
+                    response.service.skillsDescription ||
+                    "",
+                  aiModel: response.service.aiModel || "gpt-4",
+                  aiVersion: response.service.aiVersion || "1.0",
+                },
+                {
+                  headers: {
+                    ...authHeader(),
+                    "Content-Type": "application/json",
+                  },
+                }
+              )
+              .catch((error) => {
+                console.error(
+                  "Erreur lors de l'enregistrement du service:",
+                  error
+                );
+              });
           }
         })
         .catch((error) => {
@@ -1166,13 +1190,15 @@ const ChatBox = ({
   const getUserInitials = () => {
     if (user) {
       if (user.firstName && user.lastName) {
-        return `${user.firstName[0] ?? ''}${user.lastName[0] ?? ''}`.toUpperCase();
+        return `${user.firstName[0] ?? ""}${
+          user.lastName[0] ?? ""
+        }`.toUpperCase();
       }
       if (user.email) {
         return user.email[0].toUpperCase();
       }
     }
-    return 'U';
+    return "U";
   };
 
   const handleSendMessage = async () => {
@@ -1247,41 +1273,60 @@ const ChatBox = ({
       // Traitement pour le nouveau format n8n
       if (response && response.message) {
         messageContent = response.message;
-        console.log('Message extrait avec succès du nouveau format n8n:', messageContent);
+        console.log(
+          "Message extrait avec succès du nouveau format n8n:",
+          messageContent
+        );
 
         // Si ready est à true et que le chat est de type create_service, on enregistre en base de données le service
-        if (response.ready === true && chatType === 'create_service') {
-          console.log('Enregistrement du service en base de données');
+        if (response.ready === true && chatType === "create_service") {
+          console.log("Enregistrement du service en base de données");
           // TODO: appel l'api au controller service POST pour enregistrer le service en base de données
 
-          axios.post(`${API_BASE_URL}/services`, {
-            serviceType: "human_provider",
-            user: user?.id,
-            firstName: response.service.firstName || "",
-            lastName: response.service.lastName || "", 
-            aiAgentName: response.service.name || "Service IA",
-            organization: response.service.organization || 0, 
-            phone: response.service.phone || "", 
-            hourlyRate: response.service.hourlyRate || 0, 
-            professionalDescription: response.service.professionalDescription || "",
-            skillsDescription: response.service.skillsDescription || "",
-            skills: response.service.skills || [],
-            domains: response.service.domains || [],
-            localization: response.service.localization || "",
-            shortProfessionalDescription: response.service.shortProfessionalDescription || response.service.description || "",
-            shortSkillsDescription: response.service.shortSkillsDescription || response.service.skillsDescription || "",
-            aiModel: response.service.aiModel || "gpt-4",
-            aiVersion: response.service.aiVersion || "1.0"
-          }, {
-            headers: {
-              ...authHeader(),
-              'Content-Type': 'application/json'
-            }
-          }).catch(error => {
-            console.error('Erreur lors de l\'enregistrement du service:', error);
-          });
+          axios
+            .post(
+              `${API_BASE_URL}/services`,
+              {
+                serviceType: "human_provider",
+                user: user?.id,
+                firstName: response.service.firstName || "",
+                lastName: response.service.lastName || "",
+                aiAgentName: response.service.name || "Service IA",
+                organization: response.service.organization || 0,
+                phone: response.service.phone || "",
+                hourlyRate: response.service.hourlyRate || 0,
+                professionalDescription:
+                  response.service.professionalDescription || "",
+                skillsDescription: response.service.skillsDescription || "",
+                skills: response.service.skills || [],
+                domains: response.service.domains || [],
+                localization: response.service.localization || "",
+                shortProfessionalDescription:
+                  response.service.shortProfessionalDescription ||
+                  response.service.description ||
+                  "",
+                shortSkillsDescription:
+                  response.service.shortSkillsDescription ||
+                  response.service.skillsDescription ||
+                  "",
+                aiModel: response.service.aiModel || "gpt-4",
+                aiVersion: response.service.aiVersion || "1.0",
+              },
+              {
+                headers: {
+                  ...authHeader(),
+                  "Content-Type": "application/json",
+                },
+              }
+            )
+            .catch((error) => {
+              console.error(
+                "Erreur lors de l'enregistrement du service:",
+                error
+              );
+            });
         }
-        
+
         // Si nous avons des professionnels à afficher et ready est true
         if (
           response.ready === true &&
@@ -1568,14 +1613,16 @@ const ChatBox = ({
                         {msg.isUser ? (
                           <Box
                             dangerouslySetInnerHTML={{
-                              __html: convertMarkdownToHtml(msg.content.replace(/\n/g, '<br>'))
+                              __html: convertMarkdownToHtml(
+                                msg.content.replace(/\n/g, "<br>")
+                              ),
                             }}
                             sx={{
                               ...markdownStyles,
                               color: "white",
                               "& *": {
-                                color: "white !important"
-                              }
+                                color: "white !important",
+                              },
                             }}
                           />
                         ) : (
@@ -1646,8 +1693,9 @@ const ChatBox = ({
 
                                 // Add a message to indicate selection
                                 const selectionMessage: ChatMessage = {
-                                  content: `Vous avez sélectionné le professionnel : ${pro.description.split(",")[0]
-                                    }. Un représentant vous contactera prochainement.`,
+                                  content: `Vous avez sélectionné le professionnel : ${
+                                    pro.description.split(",")[0]
+                                  }. Un représentant vous contactera prochainement.`,
                                   isUser: false,
                                   timestamp: new Date(),
                                 };
@@ -1723,7 +1771,7 @@ const ChatBox = ({
             flexDirection: "column",
           }}
         >
-          <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }}>
+          <Box sx={{ display: "flex", gap: 1, alignItems: "flex-end" }}>
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <TextField
                 fullWidth
@@ -1765,7 +1813,7 @@ const ChatBox = ({
               endIcon={<SendIcon />}
               onClick={handleSendMessage}
               disabled={!newMessage.trim() || isLoading}
-              sx={{ borderRadius: 3, px: 3, py: 1, alignSelf: 'flex-end' }}
+              sx={{ borderRadius: 3, px: 3, py: 1, alignSelf: "flex-end" }}
             >
               Envoyer
             </Button>
@@ -1776,7 +1824,7 @@ const ChatBox = ({
             sx={{
               fontSize: "0.75rem",
               opacity: 0.7,
-              fontFamily: "monospace"
+              fontFamily: "monospace",
             }}
           >
             Enter pour envoyer • Maj+Enter pour retour à la ligne
