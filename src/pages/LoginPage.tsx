@@ -129,7 +129,23 @@ const LoginPage = () => {
                   </InputAdornment>
                 ),
               }}
-            />{" "}
+            />
+            <Box sx={{ textAlign: "right", mt: 0, mb: 1 }}>
+              <Button
+                component={RouterLink}
+                to="/forgot-password"
+                color="primary"
+                sx={{
+                  textTransform: "none",
+                  fontSize: "0.95rem",
+                  fontWeight: 500,
+                  p: 0,
+                  minWidth: 0,
+                }}
+              >
+                Mot de passe oublié ?
+              </Button>
+            </Box>
             {(localError ?? authError) && (
               <Alert severity="error" sx={{ mt: 2 }}>
                 {localError ?? authError}

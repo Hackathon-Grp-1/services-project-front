@@ -94,9 +94,11 @@ const RegisterPage = () => {
       setFieldErrors({ password: true, confirmPassword: true });
       return;
     }
-    // Password strength (exemple simple)
-    if (formData.password.length < 8) {
-      setError("Le mot de passe doit contenir au moins 8 caractères.");
+    // Password strength (règles : min 8 caractères, 1 majuscule, 1 chiffre)
+    if (!/^(?=.*[A-Z])(?=.*\d).{8,}$/.test(formData.password)) {
+      setError(
+        "Le mot de passe doit contenir au moins 8 caractères, 1 majuscule et 1 chiffre."
+      );
       setFieldErrors({ password: true });
       return;
     }
@@ -218,6 +220,7 @@ const RegisterPage = () => {
               value={formData.password}
               onChange={handleChange}
               error={!!fieldErrors.password}
+              helperText="Au moins 8 caractères, 1 majuscule, 1 chiffre."
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">

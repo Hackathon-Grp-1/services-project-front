@@ -20,17 +20,17 @@ import DashboardPage from "./pages/DashboardPage";
 import EmailValidationPage from "./pages/EmailValidationPage";
 import HomePage from "./pages/HomePage";
 import HowItWorksPage from "./pages/HowItWorksPage";
-import LegalNoticePage from './pages/LegalNoticePage';
+import LegalNoticePage from "./pages/LegalNoticePage";
 import LoginPage from "./pages/LoginPage";
 import NeedFormPage from "./pages/NeedFormPage";
 import PathEditorPage from "./pages/PathEditorPage";
 import PricingPage from "./pages/PricingPage";
-import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import ProfilePage from "./pages/ProfilePage";
 import RegisterPage from "./pages/RegisterPage";
 import ServicePathsPage from "./pages/ServicePathsPage";
 import ServicesPage from "./pages/ServicesPage";
-import TermsOfServicePage from './pages/TermsOfServicePage';
+import TermsOfServicePage from "./pages/TermsOfServicePage";
 
 // Create MUI theme with our custom colors
 const theme = createTheme({
@@ -82,6 +82,8 @@ import Layout from "./components/layout/Layout";
 import BlogPage from "./pages/BlogPage";
 import CareersPage from "./pages/CareersPage";
 import ScrollToTop from "./utils/ScrollToTop";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordConfirmPage from "./pages/ResetPasswordConfirmPage";
 
 function App() {
   return (
@@ -128,9 +130,17 @@ function App() {
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/legal-notice" element={<LegalNoticePage />} />
               <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-              <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+              <Route
+                path="/terms-of-service"
+                element={<TermsOfServicePage />}
+              />
               <Route path="/careers" element={<CareersPage />} />
               <Route path="/blog" element={<BlogPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route
+                path="/reset-password-confirm"
+                element={<ResetPasswordConfirmPage />}
+              />
             </Routes>
           </Layout>
         </AuthProvider>
