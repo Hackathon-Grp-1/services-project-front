@@ -137,12 +137,13 @@ const Navbar = () => {
 
   // Logo component
   const Logo = ({ isScrolled }: { isScrolled: boolean }) => {
+    const { isLoggedIn } = useAuth(); // Ajout pour accès à isLoggedIn
     return (
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <Typography
           variant="h6"
           component={RouterLink}
-          to="/"
+          to={isLoggedIn ? "/dashboard" : "/"}
           sx={{
             fontFamily: "'Orbitron', sans-serif",
             fontWeight: 600,
