@@ -22,8 +22,8 @@ import {
 import { useTheme } from '@mui/material/styles';
 import { useEffect, useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { scrollToElement, isAnchorLink } from '../../utils/scrollHelper';
 import { useAuth } from '../../contexts/AuthContext';
+import { isAnchorLink, scrollToElement } from '../../utils/scrollHelper';
 
 interface NavItemType {
   label: string;
