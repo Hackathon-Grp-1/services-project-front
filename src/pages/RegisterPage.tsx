@@ -12,15 +12,15 @@ const RegisterPage = () => {
     lastName: '',
     email: '',
     phoneNumber: '',
-    comment: '',
     password: '',
     confirmPassword: '',
-    acceptTerms: false
+    acceptTerms: false,
+    role: '', // Ajout du champ rôle
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<{[key:string]: boolean}>({});
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: boolean }>({});
   const navigate = useNavigate();
 
   const handleClickShowPassword = () => {
@@ -30,7 +30,7 @@ const RegisterPage = () => {
     setShowConfirmPassword(!showConfirmPassword);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, checked } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -43,13 +43,14 @@ const RegisterPage = () => {
     setError(null);
     setFieldErrors({});
     // Validation côté client
-    const errors: {[key:string]: boolean} = {};
+    const errors: { [key: string]: boolean } = {};
     if (!formData.firstName.trim()) errors.firstName = true;
     if (!formData.lastName.trim()) errors.lastName = true;
     if (!formData.email.trim()) errors.email = true;
     if (!formData.phoneNumber.trim()) errors.phoneNumber = true;
     if (!formData.password) errors.password = true;
     if (!formData.confirmPassword) errors.confirmPassword = true;
+    if (!formData.role) errors.role = true; // Validation du rôle
     if (Object.keys(errors).length > 0) {
       setError('Merci de remplir tous les champs obligatoires.');
       setFieldErrors(errors);
@@ -84,11 +85,11 @@ const RegisterPage = () => {
       await register({
         firstName: formData.firstName,
         lastName: formData.lastName,
-        comment: formData.comment,
         email: formData.email,
-        phoneNumber: formData.phoneNumber,
+        phoneNumber: formData.phoneNumber || undefined, // optionnel
         password: formData.password,
-        confirmPassword: formData.confirmPassword
+        confirmPassword: formData.confirmPassword,
+        role: formData.role,
       });
       setSuccess(true);
       setTimeout(() => {
@@ -174,15 +175,6 @@ const RegisterPage = () => {
             />
             <TextField
               margin="normal"
-              fullWidth
-              id="comment"
-              label="Commentaire (optionnel)"
-              name="comment"
-              value={formData.comment}
-              onChange={handleChange}
-            />
-            <TextField
-              margin="normal"
               required
               fullWidth
               name="password"
@@ -233,11 +225,29 @@ const RegisterPage = () => {
                 ),
               }}
             />
+            <TextField
+              select
+              margin="normal"
+              required
+              fullWidth
+              id="role"
+              name="role"
+              label=""
+              value={formData.role}
+              onChange={handleChange}
+              error={!!fieldErrors.role}
+              SelectProps={{ native: true }}
+              sx={{ mt: 2 }}
+            >
+              <option value="" disabled>Choisissez votre profil *</option>
+              <option value="ENTREPRENEUR">Entrepreneur</option>
+              <option value="CUSTOMER">Client</option>
+            </TextField>
             <FormControlLabel
               control={
-                <Checkbox 
-                  name="acceptTerms" 
-                  color="secondary" 
+                <Checkbox
+                  name="acceptTerms"
+                  color="secondary"
                   checked={formData.acceptTerms}
                   onChange={handleChange}
                   required
