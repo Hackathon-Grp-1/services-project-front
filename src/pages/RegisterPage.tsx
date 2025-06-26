@@ -1,19 +1,19 @@
-import { useState } from "react";
-import {
-  Box,
-  Typography,
-  TextField,
-  Button,
-  Container,
-  Paper,
-  InputAdornment,
-  IconButton,
-  Checkbox,
-  FormControlLabel,
-  Snackbar,
-  Alert,
-} from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import {
+  Alert,
+  Box,
+  Button,
+  Checkbox,
+  Container,
+  FormControlLabel,
+  IconButton,
+  InputAdornment,
+  Paper,
+  Snackbar,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { register } from "../api/authApi";
 
@@ -279,16 +279,43 @@ const RegisterPage = () => {
               <option value="CUSTOMER">Client</option>
             </TextField>
             <FormControlLabel
+              sx={{ alignItems: 'flex-start', mt: 1 }}
               control={
                 <Checkbox
                   name="acceptTerms"
                   color="secondary"
                   checked={formData.acceptTerms}
                   onChange={handleChange}
-                  required
+                  sx={{ mt: 0.2 }}
                 />
               }
-              label="J'accepte les conditions générales d'utilisation et la politique de confidentialité"
+              label={
+                <Box component="span" sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', lineHeight: 1.4 }}>
+                  <Typography variant="body2" component="span" sx={{ mr: 0.5 }}>
+                    J'accepte les
+                  </Typography>
+                  <Button
+                    component={RouterLink}
+                    to="/terms-of-service"
+                    color="secondary"
+                    sx={{ textTransform: 'none', p: 0, minWidth: 'auto', textDecoration: 'underline', fontWeight: 500 }}
+                  >
+                    conditions générales d'utilisation
+                  </Button>
+                  <Typography variant="body2" component="span" sx={{ mx: 0.5 }}>
+                    et la
+                  </Typography>
+                  <Button
+                    component={RouterLink}
+                    to="/privacy-policy"
+                    color="secondary"
+                    sx={{ textTransform: 'none', p: 0, minWidth: 'auto', textDecoration: 'underline', fontWeight: 500 }}
+                  >
+                    politique de confidentialité
+                  </Button>
+                  <Typography variant="body2" component="span" color="error" sx={{ ml: 0.5 }}>*</Typography>
+                </Box>
+              }
             />
             <Button
               type="submit"

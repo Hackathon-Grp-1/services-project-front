@@ -211,11 +211,15 @@ const Footer = () => {
               Légal
             </Typography>
             <Box component="ul" sx={{ p: 0, m: 0, listStyle: 'none' }}>
-              {['Conditions d\'utilisation', 'Politique de confidentialité', 'Mentions légales'].map((item) => (
-                <Box component="li" key={item} sx={{ mb: 1 }}>
+              {[
+                { name: 'Conditions d\'utilisation', url: '/terms-of-service' },
+                { name: 'Politique de confidentialité', url: '/privacy-policy' },
+                { name: 'Mentions légales', url: '/legal-notice' }
+              ].map((item) => (
+                <Box component="li" key={item.name} sx={{ mb: 1 }}>
                   <Link
                     component={RouterLink}
-                    to={`/legal/${item.toLowerCase().replace(/\s+/g, '-').replace(/[éè']/g, e => e === "'" ? '' : 'e')}`}
+                    to={item.url}
                     sx={{
                       color: 'white',
                       textDecoration: 'none',
@@ -224,7 +228,7 @@ const Footer = () => {
                       fontSize: '0.9rem'
                     }}
                   >
-                    {item}
+                    {item.name}
                   </Link>
                 </Box>
               ))}
