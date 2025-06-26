@@ -1,7 +1,7 @@
 // API functions for authentication
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:3007/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Define types
 export interface LoginCredentials {
@@ -38,6 +38,16 @@ export interface AuthResponse {
   user: User;
 }
 
+export interface RegisterCredentials {
+  firstName: string;
+  lastName: string;
+  comment?: string;
+  email: string;
+  phoneNumber: string;
+  password: string;
+  confirmPassword: string;
+}
+
 // Login function
 export const login = async (credentials: LoginCredentials): Promise<AuthResponse> => {
   try {
@@ -52,6 +62,17 @@ export const login = async (credentials: LoginCredentials): Promise<AuthResponse
     return response.data;
   } catch (error) {
     console.error('Login error:', error);
+    throw error;
+  }
+};
+
+// Register function
+export const register = async (credentials: RegisterCredentials): Promise<any> => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/auth/register`, credentials);
+    return response.data;
+  } catch (error) {
+    console.error('Register error:', error);
     throw error;
   }
 };

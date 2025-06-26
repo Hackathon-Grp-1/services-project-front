@@ -13,7 +13,9 @@ import {
   Container, 
   useMediaQuery,
   Menu,
-  MenuItem
+  MenuItem,
+  Snackbar,
+  Alert
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -21,6 +23,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { scrollToElement, isAnchorLink } from '../../utils/scrollHelper';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface NavItemType {
   label: string;
@@ -235,10 +238,14 @@ const Navbar = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [logoutInfo, setLogoutInfo] = useState(false);
 
   // For dropdowns
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  
+  // Auth context
+  const { isLoggedIn, logout } = useAuth();
   
   // Effect to detect scrolling
   useEffect(() => {
@@ -290,6 +297,12 @@ const Navbar = () => {
     }
   };
   
+  const handleLogout = () => {
+    logout();
+    setLogoutInfo(true);
+    navigate('/');
+  };
+
   // Mobile drawer content
   const drawer = (
     <Box sx={{ textAlign: 'center', p: 2 }}>      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -333,23 +346,46 @@ const Navbar = () => {
         }
       </List>
       <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
-        <Button 
-          variant="outlined" 
-          fullWidth
-          component={RouterLink}
-          to="/login"
-        >
-          Se connecter
-        </Button>
-        <Button 
-          variant="contained" 
-          color="secondary" 
-          fullWidth
-          component={RouterLink}
-          to="/register"
-        >
-          S'inscrire
-        </Button>
+        {isLoggedIn ? (
+          <>
+            <Button
+              variant="outlined"
+              fullWidth
+              component={RouterLink}
+              to="/dashboard"
+            >
+              Mon espace
+            </Button>
+            <Button
+              variant="contained"
+              color="secondary"
+              fullWidth
+              onClick={handleLogout}
+            >
+              Se déconnecter
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button 
+              variant="outlined" 
+              fullWidth
+              component={RouterLink}
+              to="/login"
+            >
+              Se connecter
+            </Button>
+            <Button 
+              variant="contained" 
+              color="secondary" 
+              fullWidth
+              component={RouterLink}
+              to="/register"
+            >
+              S'inscrire
+            </Button>
+          </>
+        )}
       </Box>
     </Box>
   );
@@ -363,6 +399,11 @@ const Navbar = () => {
         zIndex: (theme) => theme.zIndex.drawer + 1,
       }}
     >
+      <Snackbar open={logoutInfo} autoHideDuration={2000} onClose={() => setLogoutInfo(false)} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+        <Alert severity="info" sx={{ width: '100%' }}>
+          Vous avez été déconnecté.
+        </Alert>
+      </Snackbar>
       <Container maxWidth="xl">        <Toolbar 
           sx={{ 
             justifyContent: 'space-between', 
@@ -375,7 +416,6 @@ const Navbar = () => {
           }}
         >
           <Logo isScrolled={scrolled} />
-
           {/* Mobile menu button */}
           {isMobile && (
             <IconButton
@@ -387,7 +427,6 @@ const Navbar = () => {
               <MenuIcon />
             </IconButton>
           )}
-
           {/* Desktop navigation */}
           {!isMobile && (
             <Box sx={{ display: 'flex', alignItems: 'center' }}>              <DesktopNav 
@@ -399,39 +438,53 @@ const Navbar = () => {
                 isScrolled={scrolled}
               />
               <Box sx={{ ml: 2, display: 'flex', gap: 1 }}>
-                <Button 
-                  variant="outlined" 
-                  color="inherit" 
-                  sx={{ 
-                    borderColor: 'white', 
-                    textTransform: 'none',
-                    py: scrolled ? 0.5 : 0.75,
-                    transition: 'all 0.3s ease',
-                  }}
-                  component={RouterLink}
-                  to="/login"
-                >
-                  Se connecter
-                </Button>
-                <Button 
-                  variant="contained" 
-                  color="secondary"
-                  sx={{ 
-                    textTransform: 'none',
-                    py: scrolled ? 0.5 : 0.75,
-                    transition: 'all 0.3s ease',
-                  }}
-                  component={RouterLink}
-                  to="/register"
-                >
-                  S'inscrire
-                </Button>
+                {isLoggedIn ? (
+                  <>
+                    <Button
+                      variant="outlined"
+                      color="inherit"
+                      sx={{ borderColor: 'white', textTransform: 'none', py: scrolled ? 0.5 : 0.75, transition: 'all 0.3s ease' }}
+                      component={RouterLink}
+                      to="/dashboard"
+                    >
+                      Mon espace
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      sx={{ textTransform: 'none', py: scrolled ? 0.5 : 0.75, transition: 'all 0.3s ease' }}
+                      onClick={handleLogout}
+                    >
+                      Se déconnecter
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button 
+                      variant="outlined" 
+                      color="inherit" 
+                      sx={{ borderColor: 'white', textTransform: 'none', py: scrolled ? 0.5 : 0.75, transition: 'all 0.3s ease' }}
+                      component={RouterLink}
+                      to="/login"
+                    >
+                      Se connecter
+                    </Button>
+                    <Button 
+                      variant="contained" 
+                      color="secondary"
+                      sx={{ textTransform: 'none', py: scrolled ? 0.5 : 0.75, transition: 'all 0.3s ease' }}
+                      component={RouterLink}
+                      to="/register"
+                    >
+                      S'inscrire
+                    </Button>
+                  </>
+                )}
               </Box>
             </Box>
           )}
         </Toolbar>
       </Container>
-
       {/* Mobile drawer */}
       <Drawer
         variant="temporary"
