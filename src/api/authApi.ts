@@ -1,7 +1,7 @@
 // API functions for authentication
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3007/api/v1';
 
 // Define types
 export interface LoginCredentials {
@@ -57,6 +57,7 @@ export const login = async (credentials: LoginCredentials): Promise<AuthResponse
     if (response.data.accessToken) {
       localStorage.setItem('authToken', response.data.accessToken);
       localStorage.setItem('user', JSON.stringify(response.data.user));
+      localStorage.setItem('tokenExpiry', new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString()); // 4 hours
     }
     
     return response.data;
@@ -81,24 +82,51 @@ export const register = async (credentials: RegisterCredentials): Promise<any> =
 export const logout = (): void => {
   localStorage.removeItem('authToken');
   localStorage.removeItem('user');
+  localStorage.removeItem('tokenExpiry');
 };
 
 // Check if user is authenticated
 export const isAuthenticated = (): boolean => {
-  return localStorage.getItem('authToken') !== null;
+  const token = localStorage.getItem('authToken');
+  const expiry = localStorage.getItem('tokenExpiry');
+  
+  if (!token || !expiry) {
+    return false;
+  }
+  
+  // Check if token has expired
+  const expiryDate = new Date(expiry);
+  const now = new Date();
+  
+  if (now > expiryDate) {
+    // Token expired, clear storage
+    logout();
+    return false;
+  }
+  
+  return true;
 };
 
 // Get current user
-export const getCurrentUser = (): any => {
+export const getCurrentUser = (): User | null => {
   const userStr = localStorage.getItem('user');
   if (userStr) {
-    return JSON.parse(userStr);
+    try {
+      return JSON.parse(userStr);
+    } catch (error) {
+      console.error('Error parsing user from localStorage:', error);
+      logout();
+      return null;
+    }
   }
   return null;
 };
 
 // Get auth token
 export const getAuthToken = (): string | null => {
+  if (!isAuthenticated()) {
+    return null;
+  }
   return localStorage.getItem('authToken');
 };
 

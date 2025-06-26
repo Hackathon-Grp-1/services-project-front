@@ -15,6 +15,7 @@ import ContractPage from './pages/ContractPage';
 import DashboardPage from './pages/DashboardPage';
 import CreateServicePage from './pages/CreateServicePage';
 import ProfilePage from './pages/ProfilePage';
+import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import './index.css';
 import '@fontsource/inter/400.css';
@@ -84,7 +85,6 @@ function App() {  return (
           <Layout>
             <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/need-form" element={<NeedFormPage />} />
             <Route path="/service-paths" element={<ServicePathsPage />} />
             <Route path="/services" element={<ServicesPage />} />
             <Route path="/services/consultation" element={<ServicesPage />} />
@@ -100,7 +100,8 @@ function App() {  return (
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route path="/create-service" element={<CreateServicePage />} />
+            <Route path="/need-form" element={<ProtectedRoute><NeedFormPage /></ProtectedRoute>} />
+            <Route path="/create-service" element={<ProtectedRoute><CreateServicePage /></ProtectedRoute>} />
             <Route path="/profile" element={<ProfilePage />} />
             </Routes>
           </Layout>

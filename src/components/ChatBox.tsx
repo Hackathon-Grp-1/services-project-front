@@ -1,24 +1,23 @@
-import React, { useState, useRef, useEffect, type ReactElement } from "react";
-import {
-  Box,
-  TextField,
-  Button,
-  Typography,
-  IconButton,
-  CircularProgress,
-  Card,
-  CardContent,
-  CardActions,
-} from "@mui/material";
-import SendIcon from "@mui/icons-material/Send";
-import CloseIcon from "@mui/icons-material/Close";
-import PersonIcon from "@mui/icons-material/Person";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  sendPrompt,
-  sendCreateServicePrompt,
-  startNewChat,
-} from "../api/chatApi";
+import React, { useState, useRef, useEffect, type ReactElement } from 'react';
+import { 
+  Box, 
+  TextField, 
+  Button, 
+  Typography, 
+  IconButton, 
+  CircularProgress, 
+  Card, 
+  CardContent, 
+  CardActions 
+} from '@mui/material';
+import SendIcon from '@mui/icons-material/Send';
+import CloseIcon from '@mui/icons-material/Close';
+import PersonIcon from '@mui/icons-material/Person';
+import { motion, AnimatePresence } from 'framer-motion';
+import { sendPrompt, sendCreateServicePrompt, startNewChat, type ChatResponse } from '../api/chatApi';
+import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
+import { getAuthToken, authHeader } from '../api/authApi';
 
 interface ChatMessage {
   content: string;
@@ -38,6 +37,8 @@ interface ChatBoxProps {
   onNewConversation?: () => void;
   chatType?: "search" | "create_service";
 }
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3007/api/v1';
 
 // Component for displaying professional cards
 const ProfessionalCard = ({
@@ -669,6 +670,9 @@ const ChatBox = ({
   // État pour suivre si le chat vient d'être initialisé
   const [isInitialRender, setIsInitialRender] = useState(true);
 
+  // Récupérer l'utilisateur connecté au niveau du composant
+  const { user } = useAuth();
+
   // Focus initial sur le TextField
   useEffect(() => {
     if (!isLoading && !initialPrompt) {
@@ -768,9 +772,41 @@ const ChatBox = ({
             timestamp: new Date(),
             professionals: professionals,
           };
+          
+          console.log('Ajout de la réponse initiale du bot:', botMessage);
+          setMessages(prev => [...prev, botMessage]);
+          
+          // Si ready est à true et que le chat est de type create_service, on enregistre en base de données le service
+          if (response.ready === true && chatType === 'create_service') {
+            console.log('Enregistrement du service en base de données');
+            // TODO: appel l'api au controller service POST pour enregistrer le service en base de données
 
-          console.log("Ajout de la réponse initiale du bot:", botMessage);
-          setMessages((prev) => [...prev, botMessage]);
+            axios.post(`${API_BASE_URL}/services`, {
+              serviceType: "human",
+              user: user?.id,
+              firstName: response.service.firstName || "",
+              lastName: response.service.lastName || "", 
+              aiAgentName: response.service.name || "Service IA",
+              organization: response.service.organization || 0, 
+              phone: response.service.phone || "", 
+              hourlyRate: response.service.hourlyRate || 0, 
+              professionalDescription: response.service.professionalDescription || "",
+              skillsDescription: response.service.skillsDescription || "",
+              skills: response.service.skills || [],
+              domain: response.service.domain || "general",
+              shortProfessionalDescription: response.service.shortProfessionalDescription || response.service.description || "",
+              shortSkillsDescription: response.service.shortSkillsDescription || response.service.skillsDescription || "",
+              aiModel: response.service.aiModel || "gpt-4",
+              aiVersion: response.service.aiVersion || "1.0"
+            }, {
+              headers: {
+                ...authHeader(),
+                'Content-Type': 'application/json'
+              }
+            }).catch(error => {
+              console.error('Erreur lors de l\'enregistrement du service:', error);
+            });
+          }
         })
         .catch((error) => {
           console.error("Erreur lors du message initial:", error);
@@ -908,11 +944,41 @@ const ChatBox = ({
       // Traitement pour le nouveau format n8n
       if (response && response.message) {
         messageContent = response.message;
-        console.log(
-          "Message extrait avec succès du nouveau format n8n:",
-          messageContent
-        );
+        console.log('Message extrait avec succès du nouveau format n8n:', messageContent);
 
+        // Si ready est à true et que le chat est de type create_service, on enregistre en base de données le service
+        if (response.ready === true && chatType === 'create_service') {
+          console.log('Enregistrement du service en base de données');
+          // TODO: appel l'api au controller service POST pour enregistrer le service en base de données
+
+          axios.post(`${API_BASE_URL}/services`, {
+            serviceType: "human_provider",
+            user: user?.id,
+            firstName: response.service.firstName || "",
+            lastName: response.service.lastName || "", 
+            aiAgentName: response.service.name || "Service IA",
+            organization: response.service.organization || 0, 
+            phone: response.service.phone || "", 
+            hourlyRate: response.service.hourlyRate || 0, 
+            professionalDescription: response.service.professionalDescription || "",
+            skillsDescription: response.service.skillsDescription || "",
+            skills: response.service.skills || [],
+            domains: response.service.domains || [],
+            localization: response.service.localization || "",
+            shortProfessionalDescription: response.service.shortProfessionalDescription || response.service.description || "",
+            shortSkillsDescription: response.service.shortSkillsDescription || response.service.skillsDescription || "",
+            aiModel: response.service.aiModel || "gpt-4",
+            aiVersion: response.service.aiVersion || "1.0"
+          }, {
+            headers: {
+              ...authHeader(),
+              'Content-Type': 'application/json'
+            }
+          }).catch(error => {
+            console.error('Erreur lors de l\'enregistrement du service:', error);
+          });
+        }
+        
         // Si nous avons des professionnels à afficher et ready est true
         if (
           response.ready === true &&

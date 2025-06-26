@@ -25,6 +25,7 @@ import {
   Typography
 } from '@mui/material';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { Service } from '../api/servicesApi';
 import ServiceCard from '../components/ServiceCard';
 import { useAuth } from '../contexts/AuthContext';
@@ -32,6 +33,7 @@ import { useServices } from '../hooks/useServices';
 
 const DashboardPage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const {
     services,
     loading,
@@ -135,7 +137,7 @@ const DashboardPage = () => {
             Mes Services
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Bienvenue {user?.name || user?.email}, gérez vos services proposés
+            Bienvenue {user?.firstName ? `${user.firstName} ${user.lastName}` : user?.email}, gérez vos services proposés
           </Typography>
         </Box>
 
@@ -228,7 +230,7 @@ const DashboardPage = () => {
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
             <CircularProgress />
           </Box>
-        ) : services.length === 0 ? (
+        ) : !services || services.length === 0 ? (
           <Paper sx={{ p: 4, textAlign: 'center' }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
               Aucun service trouvé
@@ -240,6 +242,7 @@ const DashboardPage = () => {
               variant="contained"
               startIcon={<AddIcon />}
               color="secondary"
+              onClick={() => navigate('/create-service')}
             >
               Créer mon premier service
             </Button>

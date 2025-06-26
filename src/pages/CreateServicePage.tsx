@@ -4,12 +4,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ChatBox from '../components/ChatBox';
 import { startNewChat } from '../api/chatApi';
 import { useServiceStore } from '../store/serviceStore';
+import { useAuth } from '../contexts/AuthContext';
 
 const CreateServicePage = () => {
   const [inputPrompt, setInputPrompt] = useState('');
   const [error, setError] = useState('');
   const [showChat, setShowChat] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+  const { user } = useAuth();
   const { 
     setPrompt, 
     setServicePaths, 
@@ -99,6 +101,7 @@ const CreateServicePage = () => {
                   Proposez vos services
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 1 }}>
+                  {user ? `Bonjour ${user.firstName ? `${user.firstName} ${user.lastName}` : user.email} ! ` : ''}
                   Décrivez vos compétences et services pour que notre IA puisse vous aider à créer votre profil de prestataire.
                 </Typography>
               </Box>

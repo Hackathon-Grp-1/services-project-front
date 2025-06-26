@@ -48,13 +48,15 @@ export const useServices = (initialPage: number = 1, initialLimit: number = 10):
         filters?.status
       );
 
-      setServices(response.services);
-      setTotal(response.total);
-      setPage(response.page);
+      setServices(response.services || []);
+      setTotal(response.total || 0);
+      setPage(response.page || currentPage);
     } catch (err: unknown) {
       const errorMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur lors du chargement des services';
       setError(errorMessage);
       console.error('Error fetching services:', err);
+      setServices([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
@@ -134,10 +136,34 @@ export const useServices = (initialPage: number = 1, initialLimit: number = 10):
     setError(null);
   }, []);
 
-  // Load initial services
+  // Load initial services - removed fetchServices dependency to avoid infinite loop
   useEffect(() => {
-    fetchServices();
-  }, [fetchServices]);
+    const loadInitialServices = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response: ServicesResponse = await getUserServices(
+          initialPage,
+          initialLimit
+        );
+
+        setServices(response.services || []);
+        setTotal(response.total || 0);
+        setPage(response.page || initialPage);
+      } catch (err: unknown) {
+        const errorMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur lors du chargement des services';
+        setError(errorMessage);
+        console.error('Error fetching initial services:', err);
+        setServices([]);
+        setTotal(0);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadInitialServices();
+  }, []); // Empty dependency array
 
   return {
     services,

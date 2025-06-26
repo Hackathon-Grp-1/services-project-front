@@ -1,7 +1,4 @@
-import axios from 'axios';
-import { authHeader } from './authApi';
-
-const API_BASE_URL = 'http://localhost:3007/api/v1';
+import apiClient from './axiosConfig';
 
 // Types pour les services
 export interface Service {
@@ -53,11 +50,7 @@ export const getUserServices = async (
     if (category) params.append('category', category);
     if (status) params.append('status', status);
 
-    const response = await axios.get(
-      `${API_BASE_URL}/services?${params.toString()}`,
-      { headers: authHeader() }
-    );
-
+    const response = await apiClient.get(`/services?${params.toString()}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching user services:', error);
@@ -68,12 +61,7 @@ export const getUserServices = async (
 // Créer un nouveau service
 export const createService = async (serviceData: ServiceCreateRequest): Promise<Service> => {
   try {
-    const response = await axios.post(
-      `${API_BASE_URL}/services`,
-      serviceData,
-      { headers: authHeader() }
-    );
-
+    const response = await apiClient.post('/services', serviceData);
     return response.data;
   } catch (error) {
     console.error('Error creating service:', error);
@@ -87,12 +75,7 @@ export const updateService = async (
   serviceData: ServiceUpdateRequest
 ): Promise<Service> => {
   try {
-    const response = await axios.put(
-      `${API_BASE_URL}/services/${serviceId}`,
-      serviceData,
-      { headers: authHeader() }
-    );
-
+    const response = await apiClient.put(`/services/${serviceId}`, serviceData);
     return response.data;
   } catch (error) {
     console.error('Error updating service:', error);
@@ -103,10 +86,7 @@ export const updateService = async (
 // Supprimer un service
 export const deleteService = async (serviceId: string): Promise<void> => {
   try {
-    await axios.delete(
-      `${API_BASE_URL}/services/${serviceId}`,
-      { headers: authHeader() }
-    );
+    await apiClient.delete(`/services/${serviceId}`);
   } catch (error) {
     console.error('Error deleting service:', error);
     throw error;
@@ -116,11 +96,7 @@ export const deleteService = async (serviceId: string): Promise<void> => {
 // Récupérer un service spécifique
 export const getService = async (serviceId: string): Promise<Service> => {
   try {
-    const response = await axios.get(
-      `${API_BASE_URL}/services/${serviceId}`,
-      { headers: authHeader() }
-    );
-
+    const response = await apiClient.get(`/services/${serviceId}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching service:', error);

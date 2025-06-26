@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
+import { authHeader } from './authApi';
 
 const API_URL = 'https://n8n.labodolivier.com/webhook/hackathon';
 
@@ -97,7 +98,12 @@ export const sendPrompt = async (prompt: string): Promise<ChatResponse> => {
     });
     
     const startTime = Date.now();
-    const response = await axios.post(API_URL, requestData);
+    const response = await axios.post(API_URL, requestData, {
+      headers: {
+        ...authHeader(),
+        'Content-Type': 'application/json'
+      }
+    });
     const endTime = Date.now();
     
     console.log(`Réponse reçue du webhook (${endTime - startTime}ms):`, {
@@ -142,7 +148,12 @@ export const sendCreateServicePrompt = async (prompt: string): Promise<ChatRespo
     });
     
     const startTime = Date.now();
-    const response = await axios.post(API_URL, requestData);
+    const response = await axios.post(API_URL, requestData, {
+      headers: {
+        ...authHeader(),
+        'Content-Type': 'application/json'
+      }
+    });
     const endTime = Date.now();
     
     console.log(`Réponse reçue du webhook pour création de service (${endTime - startTime}ms):`, {

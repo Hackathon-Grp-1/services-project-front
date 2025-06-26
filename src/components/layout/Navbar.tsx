@@ -17,7 +17,8 @@ import {
   Alert,
   Toolbar,
   Typography,
-  useMediaQuery
+  useMediaQuery,
+  CircularProgress
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useEffect, useState } from 'react';
@@ -33,7 +34,7 @@ interface NavItemType {
 
 const Navbar = () => {
   const theme = useTheme();
-  const { user, isLoggedIn, logout } = useAuth();
+  const { user, isLoggedIn, logout, loading: authLoading } = useAuth();
   // Solution 2 : Breakpoint custom avec navigation condensée
   const isMobile = useMediaQuery('(max-width:1236px)');
   const isCompact = useMediaQuery('(min-width:1237px) and (max-width:1300px)');
@@ -65,7 +66,7 @@ const Navbar = () => {
       { label: 'Contact', path: '/contact' },
     ];
 
-    if (isLoggedIn) {
+    if (isLoggedIn && !authLoading) {
       // Supprimer Accueil si connecté
       baseItems = baseItems.filter(item => item.label !== 'Accueil');
       // Supprimer les onglets non pertinents pour les utilisateurs connectés
@@ -342,7 +343,11 @@ const Navbar = () => {
         }
       </List>
       <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
-        {isLoggedIn ? (
+        {authLoading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+            <CircularProgress size={24} />
+          </Box>
+        ) : isLoggedIn ? (
           <>
             <Button
               variant="outlined"
@@ -453,7 +458,12 @@ const Navbar = () => {
               )}
               <DesktopNav />
               <Box sx={{ ml: 2, display: 'flex', gap: 1 }}>
-                {isLoggedIn ? (
+                {authLoading ? (
+                  // Afficher un loader pendant le chargement de l'authentification
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CircularProgress size={20} color="inherit" />
+                  </Box>
+                ) : isLoggedIn ? (
                   <>
                     <Button
                       variant="outlined"

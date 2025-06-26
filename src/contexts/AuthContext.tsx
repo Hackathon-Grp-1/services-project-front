@@ -15,15 +15,25 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(isAuthenticated());
-  const [user, setUser] = useState<User | null>(getCurrentUser());
-  const [loading, setLoading] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Check authentication status on component mount
-    setIsLoggedIn(isAuthenticated());
-    setUser(getCurrentUser());
+    try {
+      const authenticated = isAuthenticated();
+      const currentUser = getCurrentUser();
+      setIsLoggedIn(authenticated);
+      setUser(currentUser);
+    } catch (error) {
+      console.error('Error initializing auth context:', error);
+      setIsLoggedIn(false);
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const login = async (credentials: LoginCredentials): Promise<AuthResponse> => {
