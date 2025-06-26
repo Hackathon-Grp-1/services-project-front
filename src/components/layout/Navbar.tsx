@@ -162,7 +162,7 @@ const Navbar = () => {
                 transition: 'all 0.3s ease',
               }}
             >
-              Services.seo
+              Services.ceo
             </Typography>
             <Typography
               variant="caption"
