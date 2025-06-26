@@ -5,10 +5,11 @@ import KeyboardReturnIcon from '@mui/icons-material/KeyboardReturn';
 import { Box, Button, CircularProgress, Container, TextField, Typography } from '@mui/material';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { startNewChat } from '../api/chatApi';
 import ChatBox from '../components/ChatBox';
-import { useServiceStore } from '../store/serviceStore';
 import { useAuth } from '../contexts/AuthContext';
+import { useServiceStore } from '../store/serviceStore';
 
 const CreateServicePage = () => {
   const [inputPrompt, setInputPrompt] = useState('');
@@ -16,13 +17,20 @@ const CreateServicePage = () => {
   const [showChat, setShowChat] = useState(false);
   const [isMac, setIsMac] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
-  const { user } = useAuth();
+  const { user, isLoggedIn } = useAuth();
   const {
     setPrompt,
     setServicePaths,
     isLoading,
     setIsLoading
   } = useServiceStore();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate('/login', { state: { mustAuth: true } });
+    }
+  }, [isLoggedIn, navigate]);
 
   // Détecter le système d'exploitation
   useEffect(() => {
