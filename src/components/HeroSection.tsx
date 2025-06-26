@@ -19,10 +19,6 @@ const HeroSection = () => {
     navigate("/create-service");
   };
 
-  const handleProposeService = () => {
-    navigate("/create-service");
-  };
-
   return (
     <Box
       component={motion.div}
