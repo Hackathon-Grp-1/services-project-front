@@ -1,7 +1,9 @@
 import {
   Add as AddIcon,
   FilterList as FilterIcon,
-  Search as SearchIcon
+  Search as SearchIcon,
+  SmartToy as SmartToyIcon,
+  Speed as SpeedIcon
 } from '@mui/icons-material';
 import {
   Alert,
@@ -13,7 +15,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Fab,
   FormControl,
   InputLabel,
   MenuItem,
@@ -21,6 +22,9 @@ import {
   Paper,
   Select,
   Snackbar,
+  SpeedDial,
+  SpeedDialAction,
+  SpeedDialIcon,
   TextField,
   Typography
 } from '@mui/material';
@@ -120,6 +124,19 @@ const DashboardPage = () => {
     fetchServices(value, filters);
   };
 
+  // Navigation vers les nouvelles pages
+  const handleNavigateToCreateService = () => {
+    navigate('/dashboard/create-service');
+  };
+
+  const handleNavigateToCreateAutomatedService = () => {
+    navigate('/dashboard/create-automated-service');
+  };
+
+  const handleNavigateToAutomatedServices = () => {
+    navigate('/automated-services');
+  };
+
   return (
     <Box sx={{ py: 4, minHeight: '100vh', bgcolor: 'background.default' }}>
       <Container maxWidth="lg">
@@ -137,7 +154,7 @@ const DashboardPage = () => {
             Mes Services
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Bienvenue {user?.firstName ? `${user.firstName} ${user.lastName}` : user?.email}, gérez vos services proposés
+            Bienvenue {user?.email}, gérez vos services proposés
           </Typography>
         </Box>
 
@@ -225,6 +242,53 @@ const DashboardPage = () => {
           </Alert>
         )}
 
+        {/* Section Services automatisés */}
+        <Paper sx={{ p: 3, mb: 3, bgcolor: 'primary.light', color: 'white' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <SmartToyIcon sx={{ mr: 1 }} />
+            <Typography variant="h6" sx={{ fontWeight: 500 }}>
+              Services automatisés
+            </Typography>
+          </Box>
+
+          <Typography variant="body2" sx={{ mb: 3, opacity: 0.9 }}>
+            Créez et gérez vos services automatisés pour les proposer sur notre plateforme.
+          </Typography>
+
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={handleNavigateToCreateAutomatedService}
+              sx={{
+                bgcolor: 'white',
+                color: 'primary.main',
+                '&:hover': {
+                  bgcolor: 'grey.100'
+                }
+              }}
+            >
+              Créer un service automatisé
+            </Button>
+
+            <Button
+              variant="outlined"
+              startIcon={<SpeedIcon />}
+              onClick={handleNavigateToAutomatedServices}
+              sx={{
+                borderColor: 'white',
+                color: 'white',
+                '&:hover': {
+                  borderColor: 'grey.300',
+                  bgcolor: 'rgba(255,255,255,0.1)'
+                }
+              }}
+            >
+              Voir tous les services
+            </Button>
+          </Box>
+        </Paper>
+
         {/* Liste des services */}
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
@@ -242,7 +306,7 @@ const DashboardPage = () => {
               variant="contained"
               startIcon={<AddIcon />}
               color="secondary"
-              onClick={() => navigate('/create-service')}
+              onClick={handleNavigateToCreateService}
             >
               Créer mon premier service
             </Button>
@@ -288,17 +352,59 @@ const DashboardPage = () => {
         )}
 
         {/* Bouton flottant pour ajouter un service */}
-        <Fab
+        <SpeedDial
+          ariaLabel="Actions rapides"
           color="secondary"
-          aria-label="Ajouter un service"
           sx={{
             position: 'fixed',
             bottom: 24,
             right: 24,
+            '& .MuiSpeedDial-fab': {
+              backgroundColor: 'secondary.main',
+              '&:hover': {
+                backgroundColor: 'secondary.dark'
+              }
+            }
           }}
+          icon={<SpeedDialIcon />}
         >
-          <AddIcon />
-        </Fab>
+          <SpeedDialAction
+            icon={<AddIcon />}
+            slotProps={{
+              tooltip: {
+                title: "Créer un service",
+                sx: {
+                  color: 'grey'
+                }
+              }
+            }}
+            onClick={handleNavigateToCreateService}
+          />
+          <SpeedDialAction
+            icon={<SmartToyIcon />}
+            slotProps={{
+              tooltip: {
+                title: "Créer un service automatisé",
+                sx: {
+                  color: 'grey'
+                }
+              }
+            }}
+            onClick={handleNavigateToCreateAutomatedService}
+          />
+          <SpeedDialAction
+            icon={<SpeedIcon />}
+            slotProps={{
+              tooltip: {
+                title: "Voir les services automatisés",
+                sx: {
+                  color: 'grey'
+                }
+              }
+            }}
+            onClick={handleNavigateToAutomatedServices}
+          />
+        </SpeedDial>
 
         {/* Dialog de confirmation de suppression */}
         <Dialog
