@@ -6,5 +6,5 @@ export const resetPassword = async (email: string): Promise<any> => {
 };
 
 export const confirmResetPassword = async (token: string, password: string): Promise<any> => {
-  return axios.post(`${API_BASE_URL}/api/v1/users/reset-password/confirm`, { token, password });
+  return axios.post(`${API_BASE_URL}/users/reset-password/confirm`, { token, password });
 };
