@@ -3,15 +3,29 @@ import apiClient from './axiosConfig';
 // Types pour les services
 export interface Service {
   id: string;
-  title: string;
-  description: string;
-  category: string;
-  price: number;
-  duration: number; // en heures
-  status: 'active' | 'inactive' | 'draft';
-  skills: string[];
-  createdAt: string;
-  updatedAt: string;
+  title?: string;
+  description?: string;
+  category?: string;
+  price?: number;
+  duration?: number; // en heures
+  status?: 'active' | 'inactive' | 'draft';
+  skills?: string[];
+  createdAt?: string;
+  updatedAt?: string;
+  // Ajout pour compatibilité backend
+  hourlyRate?: string;
+  professionalDescription?: string;
+  skillsDescription?: string;
+  aiAgentName?: string;
+  organization?: string;
+  phone?: string;
+  domains?: string[];
+  localization?: string;
+  shortProfessionalDescription?: string;
+  shortSkillsDescription?: string;
+  aiModel?: string;
+  aiVersion?: string;
+  userId?: number;
 }
 
 export interface ServiceCreateRequest {
@@ -51,6 +65,14 @@ export const getUserServices = async (
     if (status) params.append('status', status);
 
     const response = await apiClient.get(`/services?${params.toString()}`);
+    if (Array.isArray(response.data)) {
+      return {
+        services: response.data,
+        total: response.data.length,
+        page,
+        limit,
+      };
+    }
     return response.data;
   } catch (error) {
     console.error('Error fetching user services:', error);

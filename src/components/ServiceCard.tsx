@@ -103,8 +103,8 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
       <CardContent sx={{ flexGrow: 1, pb: 1 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
           <Chip
-            label={getStatusLabel(service.status)}
-            color={getStatusColor(service.status)}
+            label={getStatusLabel(service.status || 'active')}
+            color={getStatusColor(service.status || 'active')}
             size="small"
             sx={{ fontWeight: 500 }}
           />
@@ -127,11 +127,11 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             display: '-webkit-box',
-            WebkitLineClamp: 2,
+            WebkitLineClamp: 1,
             WebkitBoxOrient: 'vertical'
           }}
         >
-          {service.title}
+          {service.shortProfessionalDescription}
         </Typography>
 
         <Typography
@@ -147,33 +147,53 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
             lineHeight: 1.4
           }}
         >
-          {service.description}
+          {service.professionalDescription}
+        </Typography>
+
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{
+            mb: 2,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            display: '-webkit-box',
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: 'vertical',
+            lineHeight: 1.4
+          }}
+        >
+          {service.skillsDescription}
         </Typography>
 
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <CategoryIcon fontSize="small" color="action" />
             <Typography variant="body2" color="text.secondary">
-              {service.category}
+              {service.domains?.join(', ')}
             </Typography>
           </Box>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <EuroIcon fontSize="small" color="action" />
             <Typography variant="body2" color="text.secondary">
-              {service.price.toLocaleString('fr-FR')} €
+              {service.hourlyRate
+                ? Number(service.hourlyRate).toLocaleString('fr-FR') + ' €/h'
+                : 'Tarif non renseigné'}
             </Typography>
           </Box>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <TimeIcon fontSize="small" color="action" />
-            <Typography variant="body2" color="text.secondary">
-              {service.duration}h
-            </Typography>
-          </Box>
+          {service.duration !== undefined && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <TimeIcon fontSize="small" color="action" />
+              <Typography variant="body2" color="text.secondary">
+                {service.duration}h
+              </Typography>
+            </Box>
+          )}
         </Box>
 
-        {service.skills.length > 0 && (
+        {service.skills && service.skills.length > 0 && (
           <Box sx={{ mb: 2 }}>
             <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
               Compétences :
@@ -201,7 +221,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
         )}
 
         <Typography variant="caption" color="text.secondary">
-          Créé le {formatDate(service.createdAt)}
+          Créé le {formatDate(service.createdAt || '')}
         </Typography>
       </CardContent>
 
